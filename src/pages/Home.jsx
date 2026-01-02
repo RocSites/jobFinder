@@ -214,13 +214,6 @@ const Home = () => (
                     </div>
                 </div>
             </div>
-            <div class="footer">
-                <a href="#">Guidelines</a> |
-                <a href="#">FAQ</a> |
-                <a href="#">API</a> |
-                <a href="#">Support</a> |
-                <a href="#">GitHub</a>
-            </div>
         </div>
     </>
 )

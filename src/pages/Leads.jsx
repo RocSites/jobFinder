@@ -3,23 +3,8 @@ import './Leads.css'
 const Leads = () => (
     <>
         <div class="container">
-            <div class="header">
-                <div class="header-inner">
-                    <span class="logo">JobFlow</span>
-                    <nav class="nav">
-                        <a href="home-dashboard-hn.html">home</a>
-                        <a href="job-leads-mock-hn.html" class="active">leads</a>
-                        <a href="my-pipeline-view-hn.html">pipeline</a>
-                        <a href="#">interviews</a>
-                        <a href="#">messages</a>
-                    </nav>
-                    <div class="spacer"></div>
-                    <span class="user-info">john_doe | logout</span>
-                </div>
-            </div>
-
             <div class="main">
-                <div class="page-title">Job Leads</div>
+                <div class="page-title">Leads</div>
 
                 <div class="stats">
                     <span>12 leads</span>
@@ -207,14 +192,6 @@ const Leads = () => (
                         </tr>
                     </tbody>
                 </table>
-            </div>
-
-            <div class="footer">
-                <a href="#">Guidelines</a> |
-                <a href="#">FAQ</a> |
-                <a href="#">API</a> |
-                <a href="#">Support</a> |
-                <a href="#">GitHub</a>
             </div>
         </div>
     </>

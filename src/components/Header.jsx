@@ -5,9 +5,8 @@ const Header = () => (
     <>
         <div class="header">
             <div class="header-inner">
-                <span class="logo">JobFlow</span>
+                <Link to="/" class="logo active">JobFlow</Link>
                 <nav class="nav">
-                    <Link to="/" class="active">home</Link>
                     <Link to="/leads">leads</Link>
                     <Link to="/">pipeline</Link>
                     <Link to="/">interviews</Link>
