@@ -7,7 +7,7 @@ const Home = () => (
             <div class="main">
                 <div class="section">
                     <div class="section-header">
-                        <span>Your Pipeline</span>
+                        <span>Pipeline</span>
                         <a href="my-pipeline-view-hn.html">view all</a>
                     </div>
                     <div class="pipeline">

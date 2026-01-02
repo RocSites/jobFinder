@@ -1,0 +1,260 @@
+ * {
+     margin: 0;
+     padding: 0;
+     box-sizing: border-box;
+ }
+
+ body {
+     font-family: Verdana, Geneva, sans-serif;
+     font-size: 10pt;
+     background: #f6f6ef;
+     color: #000000;
+ }
+
+ .container {
+     max-width: 1200px;
+     margin: 0 auto;
+ }
+
+ .header {
+     background: #ff6600;
+     padding: 2px;
+ }
+
+ .header-inner {
+     background: #ff6600;
+     padding: 4px;
+     display: flex;
+     align-items: center;
+     gap: 12px;
+ }
+
+ .logo {
+     font-weight: bold;
+     color: #ffffff;
+     font-size: 11pt;
+     padding: 0 4px;
+ }
+
+ .nav {
+     display: flex;
+     gap: 12px;
+     font-size: 10pt;
+ }
+
+ .nav a {
+     color: #000000;
+     text-decoration: none;
+ }
+
+ .nav a:hover {
+     text-decoration: underline;
+ }
+
+ .spacer {
+     flex: 1;
+ }
+
+ .user-info {
+     color: #000000;
+     font-size: 10pt;
+ }
+
+ .main {
+     background: #f6f6ef;
+     padding: 8px;
+ }
+
+ .page-header {
+     margin-bottom: 12px;
+ }
+
+ .back-link {
+     font-size: 9pt;
+     color: #ff6600;
+     text-decoration: none;
+     display: inline-block;
+     margin-bottom: 8px;
+ }
+
+ .back-link:hover {
+     text-decoration: underline;
+ }
+
+ .page-title {
+     font-size: 13pt;
+     font-weight: bold;
+     margin-bottom: 4px;
+ }
+
+ .page-subtitle {
+     font-size: 10pt;
+     color: #828282;
+ }
+
+ .content-grid {
+     display: grid;
+     grid-template-columns: 1fr 400px;
+     gap: 12px;
+ }
+
+ .section {
+     background: #ffffff;
+     border: 1px solid #e6e6df;
+     padding: 8px;
+     margin-bottom: 8px;
+ }
+
+ .section-title {
+     font-size: 9pt;
+     font-weight: bold;
+     text-transform: uppercase;
+     color: #828282;
+     margin-bottom: 8px;
+     padding-bottom: 4px;
+     border-bottom: 1px solid #e6e6df;
+ }
+
+ .form-table {
+     width: 100%;
+     font-size: 9pt;
+ }
+
+ .form-table td {
+     padding: 4px 0;
+     vertical-align: top;
+ }
+
+ .form-table td:first-child {
+     width: 120px;
+     color: #828282;
+     padding-right: 8px;
+ }
+
+ .form-table input,
+ .form-table select,
+ .form-table textarea {
+     width: 100%;
+     padding: 4px;
+     font-family: Verdana, Geneva, sans-serif;
+     font-size: 9pt;
+     border: 1px solid #e6e6df;
+     background: #ffffff;
+ }
+
+ .form-table textarea {
+     min-height: 60px;
+     resize: vertical;
+ }
+
+ .comp-value {
+     color: #00a000;
+     font-weight: bold;
+     font-family: monospace;
+ }
+
+ .actions {
+     margin-top: 12px;
+     padding-top: 8px;
+     border-top: 1px solid #e6e6df;
+     display: flex;
+     gap: 8px;
+ }
+
+ .btn {
+     font-size: 9pt;
+     padding: 4px 12px;
+     border: 1px solid #e6e6df;
+     background: #ffffff;
+     cursor: pointer;
+     font-family: Verdana, Geneva, sans-serif;
+ }
+
+ .btn:hover {
+     background: #f6f6ef;
+ }
+
+ .btn-primary {
+     background: #ff6600;
+     color: #ffffff;
+     border-color: #ff6600;
+ }
+
+ .btn-primary:hover {
+     background: #cc5200;
+ }
+
+ .btn-danger {
+     color: #cc0000;
+     border-color: #cc0000;
+ }
+
+ .btn-danger:hover {
+     background: #ffe6e6;
+ }
+
+ /* Activity section */
+ .activity-item {
+     padding: 6px 0;
+     border-bottom: 1px solid #f6f6ef;
+     font-size: 9pt;
+ }
+
+ .activity-item:last-child {
+     border-bottom: none;
+ }
+
+ .activity-meta {
+     color: #828282;
+     font-size: 8pt;
+     margin-bottom: 2px;
+ }
+
+ .activity-text {
+     color: #000000;
+ }
+
+ .add-note {
+     margin-top: 8px;
+     padding-top: 8px;
+     border-top: 1px solid #e6e6df;
+ }
+
+ .add-note textarea {
+     width: 100%;
+     padding: 4px;
+     font-family: Verdana, Geneva, sans-serif;
+     font-size: 9pt;
+     border: 1px solid #e6e6df;
+     min-height: 50px;
+     margin-bottom: 4px;
+ }
+
+ .add-note button {
+     font-size: 8pt;
+ }
+
+ .footer {
+     text-align: center;
+     padding: 12px;
+     font-size: 8pt;
+     color: #828282;
+     border-top: 2px solid #ff6600;
+     margin-top: 12px;
+ }
+
+ .footer a {
+     color: #828282;
+     text-decoration: none;
+     margin: 0 6px;
+ }
+
+ .footer a:hover {
+     text-decoration: underline;
+ }
+
+ @media (max-width: 900px) {
+     .content-grid {
+         grid-template-columns: 1fr;
+     }
+ }

@@ -1,0 +1,186 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 10pt;
+    background: #f6f6ef;
+    color: #000000;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    background: #ff6600;
+    padding: 2px;
+}
+
+.header-inner {
+    background: #ff6600;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 11pt;
+    padding: 0 4px;
+}
+
+.nav {
+    display: flex;
+    gap: 12px;
+    font-size: 10pt;
+}
+
+.nav a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.nav a:hover {
+    text-decoration: underline;
+}
+
+.nav a.active {
+    color: #ffffff;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.user-info {
+    color: #000000;
+    font-size: 10pt;
+}
+
+.main {
+    background: #f6f6ef;
+    padding: 8px;
+}
+
+.page-title {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding: 4px 0;
+}
+
+.stats {
+    font-size: 9pt;
+    color: #828282;
+    margin-bottom: 12px;
+    padding: 4px 0;
+}
+
+.stats span {
+    margin-right: 16px;
+}
+
+.pipeline-table {
+    display: table;
+    width: 100%;
+    border-spacing: 4px;
+}
+
+.pipeline-col {
+    display: table-cell;
+    vertical-align: top;
+    width: 25%;
+}
+
+.col-header {
+    background: #ffffff;
+    border: 1px solid #e6e6df;
+    padding: 4px 6px;
+    font-size: 8pt;
+    text-transform: uppercase;
+    color: #828282;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.col-header .count {
+    background: #ff6600;
+    color: #ffffff;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 8pt;
+    margin-left: 4px;
+}
+
+.job-card {
+    background: #ffffff;
+    border: 1px solid #e6e6df;
+    padding: 6px;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.job-card:hover {
+    background: #f6f6ef;
+}
+
+.job-company {
+    font-size: 8pt;
+    color: #828282;
+}
+
+.job-title {
+    font-size: 10pt;
+    margin: 2px 0;
+}
+
+.job-title a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.job-title a:visited {
+    color: #828282;
+}
+
+.job-title a:hover {
+    text-decoration: underline;
+}
+
+.job-meta {
+    font-size: 8pt;
+    color: #828282;
+    margin-top: 4px;
+}
+
+.job-comp {
+    color: #00a000;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+.footer {
+    text-align: center;
+    padding: 12px;
+    font-size: 8pt;
+    color: #828282;
+    border-top: 2px solid #ff6600;
+    margin-top: 12px;
+}
+
+.footer a {
+    color: #828282;
+    text-decoration: none;
+    margin: 0 6px;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}

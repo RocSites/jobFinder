@@ -1,4 +1,5 @@
 import './Leads.css'
+import {Link} from "react-router-dom";
 
 const Leads = () => (
     <>
@@ -36,7 +37,7 @@ const Leads = () => (
                     <tbody>
                         <tr >
                             <td><span class="priority priority-high">High</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Senior Product Designer</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Senior Product Designer</Link></td>
                             <td>Figma</td>
                             <td>San Francisco, CA</td>
                             <td><span class="comp">$165k-$195k</span></td>
@@ -49,7 +50,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-high">High</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Staff Software Engineer</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Staff Software Engineer</Link></td>
                             <td>Stripe</td>
                             <td>Remote</td>
                             <td><span class="comp">$210k-$270k</span></td>
@@ -62,7 +63,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-medium">Medium</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Product Manager</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Product Manager</Link></td>
                             <td>Notion</td>
                             <td>New York, NY</td>
                             <td><span class="comp">$155k-$180k</span></td>
@@ -75,7 +76,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-high">High</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Engineering Manager</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Engineering Manager</Link></td>
                             <td>Anthropic</td>
                             <td>San Francisco, CA</td>
                             <td><span class="comp">$220k-$280k</span></td>
@@ -88,7 +89,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-low">Low</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">UX Researcher</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">UX Researcher</Link></td>
                             <td>Spotify</td>
                             <td>Stockholm, Sweden</td>
                             <td><span class="comp">$140k-$165k</span></td>
@@ -101,7 +102,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-medium">Medium</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Data Scientist</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Data Scientist</Link></td>
                             <td>Meta</td>
                             <td>Menlo Park, CA</td>
                             <td><span class="comp">$195k-$240k</span></td>
@@ -114,7 +115,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-high">High</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Frontend Engineer</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Frontend Engineer</Link></td>
                             <td>Vercel</td>
                             <td>Remote</td>
                             <td><span class="comp">$175k-$210k</span></td>
@@ -127,7 +128,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-medium">Medium</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">DevOps Engineer</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">DevOps Engineer</Link></td>
                             <td>GitLab</td>
                             <td>Austin, TX</td>
                             <td><span class="comp">$160k-$185k</span></td>
@@ -140,7 +141,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-low">Low</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Marketing Manager</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Marketing Manager</Link></td>
                             <td>Airbnb</td>
                             <td>Los Angeles, CA</td>
                             <td><span class="comp">$125k-$150k</span></td>
@@ -153,7 +154,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-high">High</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Mobile Engineer</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Mobile Engineer</Link></td>
                             <td>Coinbase</td>
                             <td>Remote</td>
                             <td><span class="comp">$185k-$230k</span></td>
@@ -166,7 +167,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-medium">Medium</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Security Engineer</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Security Engineer</Link></td>
                             <td>OpenAI</td>
                             <td>San Francisco, CA</td>
                             <td><span class="comp">$200k-$250k</span></td>
@@ -179,7 +180,7 @@ const Leads = () => (
                         </tr>
                         <tr >
                             <td><span class="priority priority-low">Low</span></td>
-                            <td><a href="lead-detail-view-hn.html" class="position-link">Content Strategist</a></td>
+                            <td><Link to="/leads/lead-detail-template" class="position-link">Content Strategist</Link></td>
                             <td>Shopify</td>
                             <td>Ottawa, Canada</td>
                             <td><span class="comp">$145k-$170k</span></td>
