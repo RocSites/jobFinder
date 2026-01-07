@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getUserLeads,
   getUserLeadById,
+  getUserLeadByLeadId,
   saveLead,
   updateUserLead,
   updateStatus,
@@ -14,6 +15,9 @@ const router = express.Router();
 
 // Pipeline view
 router.get('/pipeline', getPipeline);
+
+// Get user lead by LEAD ID (must be before /:id route)
+router.get('/by-lead/:leadId', getUserLeadByLeadId);
 
 // CRUD operations
 router.route('/')

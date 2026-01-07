@@ -2,11 +2,12 @@
 // Place this in: src/pages/Leads.jsx
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Leads.css';
 import api from '../api/client';
 
 const Leads = () => {
+  const location = useLocation();
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,10 +17,10 @@ const Leads = () => {
     activeThisWeek: 0
   });
 
-  // Fetch leads on component mount
+  // Re-fetch leads on mount and when location changes
   useEffect(() => {
     fetchLeads();
-  }, []);
+  }, [location]); // Re-run when location object changes (including state)
 
   const fetchLeads = async () => {
     try {

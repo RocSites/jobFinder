@@ -1,9 +1,10 @@
-// Updated LeadDetail.jsx component with API integration
+// Updated LeadDetail.jsx component with proper status handling
 // Place this in: src/pages/LeadDetail.jsx
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
+import './LeadDetail.css';
 
 const LeadDetail = () => {
   const { leadId } = useParams();
@@ -33,20 +34,25 @@ const LeadDetail = () => {
       const leadData = await api.leads.getById(leadId);
       setLead(leadData);
       
-      // Try to fetch user lead (if saved)
+      // Try to fetch user lead using the new by-lead endpoint
       try {
-        const userLeadData = await api.userLeads.getById(leadId);
+        const userLeadData = await api.userLeads.getByLeadId(leadId);
         setUserLead(userLeadData);
         setPriority(userLeadData.priority);
-        setStatus(userLeadData.currentStatus);
+        setStatus(userLeadData.currentStatus); // ✅ This now gets the correct status!
         setNotes(userLeadData.notes || '');
         
-        // Fetch activity
+        // Fetch activity using the ACTUAL userLead ID
         const activityData = await api.userLeads.getActivity(userLeadData._id);
         setActivity(activityData);
       } catch (err) {
         // Lead not saved yet, that's ok
         console.log('Lead not saved by user yet');
+        // Keep default values
+        setPriority('medium');
+        setStatus('saved');
+        setNotes('');
+        setActivity([]);
       }
     } catch (err) {
       setError(err.message);
@@ -62,6 +68,7 @@ const LeadDetail = () => {
         // Update existing
         await api.userLeads.update(userLead._id, { priority, notes });
         alert('Changes saved!');
+        fetchLeadDetails(); // Refresh to get latest data
       } else {
         // Create new
         await api.userLeads.save({
@@ -69,8 +76,8 @@ const LeadDetail = () => {
           priority,
           notes
         });
-        alert('Lead saved!');
-        fetchLeadDetails(); // Refresh
+        alert('Lead saved to pipeline!');
+        fetchLeadDetails(); // Refresh to get the new userLead
       }
     } catch (err) {
       alert(`Error saving: ${err.message}`);
@@ -79,31 +86,41 @@ const LeadDetail = () => {
 
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
-    
+
     if (!userLead) {
       alert('Please save the lead first');
+      e.target.value = status; // Reset dropdown
       return;
     }
-    
+
     try {
-      await api.userLeads.updateStatus(userLead._id, newStatus);
+      // Optimistically update UI
       setStatus(newStatus);
-      fetchLeadDetails(); // Refresh activity
+
+      // Make API call
+      await api.userLeads.updateStatus(userLead._id, newStatus);
+
+      // Refresh activity to show the status change in timeline
+      await fetchLeadDetails();
     } catch (err) {
       alert(`Error updating status: ${err.message}`);
+      // Revert on error
+      setStatus(status);
+      e.target.value = status; // Reset dropdown on error
     }
   };
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
     
-    const updatedNotes = notes ? `${notes}\n\n${newNote}` : newNote;
+    const updatedNotes = notes ? `${notes}\n\n[${new Date().toLocaleDateString()}] ${newNote}` : `[${new Date().toLocaleDateString()}] ${newNote}`;
     setNotes(updatedNotes);
     setNewNote('');
     
     if (userLead) {
       try {
         await api.userLeads.update(userLead._id, { notes: updatedNotes });
+        alert('Note added!');
       } catch (err) {
         alert(`Error saving note: ${err.message}`);
       }
@@ -116,9 +133,10 @@ const LeadDetail = () => {
       return;
     }
     
-    if (confirm('Remove this lead from your pipeline?')) {
+    if (window.confirm('Remove this lead from your pipeline?')) {
       try {
         await api.userLeads.remove(userLead._id);
+        alert('Lead removed from pipeline');
         navigate('/pipeline');
       } catch (err) {
         alert(`Error deleting: ${err.message}`);
@@ -127,7 +145,11 @@ const LeadDetail = () => {
   };
 
   if (loading) {
-    return <div className="main"><div className="page-title">Loading...</div></div>;
+    return (
+      <div className="main">
+        <div className="page-title">Loading...</div>
+      </div>
+    );
   }
 
   if (error || !lead) {
@@ -143,7 +165,7 @@ const LeadDetail = () => {
   return (
     <div className="main">
       <div className="page-header">
-        <button onClick={() => navigate(-1)} className="back-link">← back</button>
+        <button onClick={() => navigate(-1, { state: { refresh: Date.now() } })} className="back-link">← back</button>
         <div className="page-title">{lead.title}</div>
         <div className="page-subtitle">{lead.company} | {lead.location}</div>
       </div>
@@ -165,6 +187,10 @@ const LeadDetail = () => {
                 <tr>
                   <td>Location</td>
                   <td><input type="text" value={lead.location || 'N/A'} readOnly /></td>
+                </tr>
+                <tr>
+                  <td>Team</td>
+                  <td><input type="text" value={lead.team || 'N/A'} readOnly /></td>
                 </tr>
                 <tr>
                   <td>Compensation</td>
@@ -204,12 +230,32 @@ const LeadDetail = () => {
                   <td>Industry</td>
                   <td><input type="text" value={lead.industry || 'N/A'} readOnly /></td>
                 </tr>
+                <tr>
+                  <td>Date Posted</td>
+                  <td>
+                    <input 
+                      type="text" 
+                      value={lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A'} 
+                      readOnly 
+                    />
+                  </td>
+                </tr>
                 {lead.sourceApplicationLink && (
                   <tr>
-                    <td>Job URL</td>
+                    <td>Application URL</td>
                     <td>
                       <a href={lead.sourceApplicationLink} target="_blank" rel="noopener noreferrer">
-                        {lead.sourceApplicationLink}
+                        Apply Here →
+                      </a>
+                    </td>
+                  </tr>
+                )}
+                {lead.sourceLink && (
+                  <tr>
+                    <td>Source URL</td>
+                    <td>
+                      <a href={lead.sourceLink} target="_blank" rel="noopener noreferrer">
+                        View Source →
                       </a>
                     </td>
                   </tr>
@@ -228,15 +274,32 @@ const LeadDetail = () => {
                 </tr>
                 <tr>
                   <td>Email</td>
-                  <td><input type="text" value={lead.contactEmail || 'N/A'} readOnly /></td>
+                  <td>
+                    {lead.contactEmail ? (
+                      <a href={`mailto:${lead.contactEmail}`}>{lead.contactEmail}</a>
+                    ) : (
+                      <input type="text" value="N/A" readOnly />
+                    )}
+                  </td>
                 </tr>
+                {lead.contactLinkedIn && (
+                  <tr>
+                    <td>LinkedIn</td>
+                    <td>
+                      <a href={lead.contactLinkedIn} target="_blank" rel="noopener noreferrer">
+                        View Profile →
+                      </a>
+                    </td>
+                  </tr>
+                )}
                 <tr>
                   <td>Notes</td>
                   <td>
                     <textarea 
                       value={notes} 
                       onChange={(e) => setNotes(e.target.value)}
-                      rows="4"
+                      rows="6"
+                      placeholder="Add your notes about this opportunity..."
                     />
                   </td>
                 </tr>
@@ -246,7 +309,7 @@ const LeadDetail = () => {
 
           <div className="actions">
             <button className="btn btn-primary" onClick={handleSave}>
-              {userLead ? 'Save Changes' : 'Save Lead'}
+              {userLead ? 'Save Changes' : 'Save Lead to Pipeline'}
             </button>
             <button className="btn btn-danger" onClick={handleDelete}>
               {userLead ? 'Remove from Pipeline' : 'Back'}
@@ -256,28 +319,39 @@ const LeadDetail = () => {
 
         <div className="side-col">
           <div className="section">
-            <div className="section-title">Activity & Notes</div>
+            <div className="section-title">Activity & Timeline</div>
 
-            {activity.map((item, index) => (
-              <div key={index} className="activity-item">
-                <div className="activity-meta">
-                  {new Date(item.createdAt).toLocaleString()} | {item.action}
-                </div>
-                <div className="activity-text">{item.description}</div>
+            {userLead && (
+              <div className="lead-status-badge">
+                <strong>Current Status:</strong> {status}
               </div>
-            ))}
+            )}
 
-            {activity.length === 0 && userLead && (
+            {activity.length > 0 ? (
+              activity.map((item, index) => (
+                <div key={index} className="activity-item">
+                  <div className="activity-meta">
+                    {new Date(item.createdAt).toLocaleString()} | {item.action.replace('_', ' ')}
+                  </div>
+                  <div className="activity-text">{item.description}</div>
+                </div>
+              ))
+            ) : userLead ? (
               <div className="activity-item">
-                <div className="activity-text">No activity yet</div>
+                <div className="activity-text">No activity yet. Start tracking your progress!</div>
+              </div>
+            ) : (
+              <div className="activity-item">
+                <div className="activity-text">Save this lead to start tracking activity</div>
               </div>
             )}
 
             <div className="add-note">
               <textarea 
-                placeholder="Add a note..."
+                placeholder="Add a quick note..."
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
+                rows="3"
               />
               <button className="btn btn-primary" onClick={handleAddNote}>
                 Add Note

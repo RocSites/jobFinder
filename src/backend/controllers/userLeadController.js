@@ -2,14 +2,14 @@ import UserLead from '../models/UserLead.js';
 import Lead from '../models/Lead.js';
 import Activity from '../models/Activity.js';
 
-// Valid status transitions
+// Valid status transitions (allows moving forward and backward between stages)
 const STATUS_FLOW = {
   saved: ['applied', 'rejected', 'archived'],
-  applied: ['interviewing', 'rejected', 'archived'],
-  interviewing: ['offer', 'rejected', 'archived'],
-  offer: ['archived'],
-  rejected: ['archived'],
-  archived: []
+  applied: ['saved', 'interviewing', 'rejected', 'archived'],
+  interviewing: ['saved', 'applied', 'offer', 'rejected', 'archived'],
+  offer: ['saved', 'applied', 'interviewing', 'rejected', 'archived'],
+  rejected: ['saved', 'applied', 'interviewing', 'archived'],
+  archived: ['saved', 'applied', 'interviewing', 'offer', 'rejected']
 };
 
 // @desc    Get all user's saved leads
@@ -34,6 +34,27 @@ export const getUserLeads = async (req, res) => {
       .sort({ [sortBy]: order === 'desc' ? -1 : 1 });
     
     res.json(userLeads);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get user lead by LEAD ID (not userLead ID) - NEW!
+// @route   GET /api/user-leads/by-lead/:leadId
+export const getUserLeadByLeadId = async (req, res) => {
+  try {
+    const userId = req.query.userId || process.env.DEFAULT_USER_ID;
+    
+    const userLead = await UserLead.findOne({
+      leadId: req.params.leadId,
+      userId
+    }).populate('leadId');
+    
+    if (!userLead) {
+      return res.status(404).json({ message: 'User lead not found' });
+    }
+    
+    res.json(userLead);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

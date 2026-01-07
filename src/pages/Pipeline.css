@@ -184,3 +184,45 @@ body {
 .footer a:hover {
     text-decoration: underline;
 }
+
+/* Card action buttons */
+.card-actions {
+    margin-top: 6px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    font-size: 8pt;
+    padding: 3px 8px;
+    border: 1px solid #e6e6df;
+    background: #ff6600;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: Verdana, Geneva, sans-serif;
+    border-radius: 2px;
+}
+
+.btn-sm:hover {
+    background: #cc5200;
+}
+
+.btn-sm.btn-secondary {
+    background: #ffffff;
+    color: #828282;
+    border-color: #e6e6df;
+}
+
+.btn-sm.btn-secondary:hover {
+    background: #f6f6ef;
+    color: #000000;
+}
+
+.empty-state {
+    padding: 12px 6px;
+    font-size: 9pt;
+    color: #828282;
+    text-align: center;
+    font-style: italic;
+}

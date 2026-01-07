@@ -2,11 +2,12 @@
 // Place this in: src/pages/Pipeline.jsx
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Pipeline.css';
 import api from '../api/client';
 
 const Pipeline = () => {
+  const location = useLocation();
   const [pipeline, setPipeline] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,9 +18,10 @@ const Pipeline = () => {
     offers: 0
   });
 
+  // Re-fetch pipeline on mount and when location changes
   useEffect(() => {
     fetchPipeline();
-  }, []);
+  }, [location]); // Re-run when location object changes (including state)
 
   const fetchPipeline = async () => {
     try {
@@ -129,27 +131,54 @@ const Pipeline = () => {
                   {/* Status change buttons */}
                   <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                     {column.id === 'saved' && (
-                      <button 
+                      <button
                         className="btn-sm"
                         onClick={() => handleStatusChange(userLead._id, 'applied')}
                       >
-                        Mark Applied
+                        Mark Applied →
                       </button>
                     )}
                     {column.id === 'applied' && (
-                      <button 
-                        className="btn-sm"
-                        onClick={() => handleStatusChange(userLead._id, 'interviewing')}
-                      >
-                        Move to Interview
-                      </button>
+                      <>
+                        <button
+                          className="btn-sm btn-secondary"
+                          onClick={() => handleStatusChange(userLead._id, 'saved')}
+                          title="Move back to Saved"
+                        >
+                          ← Back
+                        </button>
+                        <button
+                          className="btn-sm"
+                          onClick={() => handleStatusChange(userLead._id, 'interviewing')}
+                        >
+                          Interview →
+                        </button>
+                      </>
                     )}
                     {column.id === 'interviewing' && (
-                      <button 
-                        className="btn-sm"
-                        onClick={() => handleStatusChange(userLead._id, 'offer')}
+                      <>
+                        <button
+                          className="btn-sm btn-secondary"
+                          onClick={() => handleStatusChange(userLead._id, 'applied')}
+                          title="Move back to Applied"
+                        >
+                          ← Back
+                        </button>
+                        <button
+                          className="btn-sm"
+                          onClick={() => handleStatusChange(userLead._id, 'offer')}
+                        >
+                          Got Offer! →
+                        </button>
+                      </>
+                    )}
+                    {column.id === 'offer' && (
+                      <button
+                        className="btn-sm btn-secondary"
+                        onClick={() => handleStatusChange(userLead._id, 'interviewing')}
+                        title="Move back to Interviewing"
                       >
-                        Got Offer!
+                        ← Back
                       </button>
                     )}
                   </div>

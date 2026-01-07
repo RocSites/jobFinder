@@ -64,10 +64,16 @@ export const userLeadsAPI = {
     return fetchAPI(`/user-leads/pipeline${query}`);
   },
 
-  // Get single user lead
+  // Get single user lead by UserLead ID
   getById: (id, userId = '') => {
     const query = userId ? `?userId=${userId}` : '';
     return fetchAPI(`/user-leads/${id}${query}`);
+  },
+
+  // Get user lead by LEAD ID (not UserLead ID) - NEW!
+  getByLeadId: (leadId, userId = '') => {
+    const query = userId ? `?userId=${userId}` : '';
+    return fetchAPI(`/user-leads/by-lead/${leadId}${query}`);
   },
 
   // Get activity timeline for a lead
