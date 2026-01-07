@@ -235,3 +235,67 @@
  .footer a:hover {
      text-decoration: underline;
  }
+
+/* Filter Sidebar */
+.leads-content {
+    display: flex;
+    gap: 12px;
+}
+
+.filter-sidebar {
+    width: 200px;
+    flex-shrink: 0;
+}
+
+.filter-section {
+    background: #ffffff;
+    border: 1px solid #e6e6df;
+    padding: 8px;
+}
+
+.filter-title {
+    font-weight: bold;
+    font-size: 10pt;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e6e6df;
+}
+
+.filter-group {
+    margin-bottom: 12px;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group-title {
+    font-size: 8pt;
+    text-transform: uppercase;
+    color: #828282;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9pt;
+    padding: 2px 0;
+    cursor: pointer;
+}
+
+.filter-checkbox input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.filter-checkbox:hover {
+    background: #f6f6ef;
+}
+
+.leads-table-container {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+}
