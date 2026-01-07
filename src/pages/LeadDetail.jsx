@@ -1,161 +1,292 @@
-import { useParams } from "react-router-dom";
+// Updated LeadDetail.jsx component with API integration
+// Place this in: src/pages/LeadDetail.jsx
+
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../api/client';
 
 const LeadDetail = () => {
   const { leadId } = useParams();
+  const navigate = useNavigate();
+  
+  const [lead, setLead] = useState(null);
+  const [userLead, setUserLead] = useState(null);
+  const [activity, setActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Form state
+  const [priority, setPriority] = useState('medium');
+  const [status, setStatus] = useState('saved');
+  const [notes, setNotes] = useState('');
+  const [newNote, setNewNote] = useState('');
+
+  useEffect(() => {
+    fetchLeadDetails();
+  }, [leadId]);
+
+  const fetchLeadDetails = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch lead details
+      const leadData = await api.leads.getById(leadId);
+      setLead(leadData);
+      
+      // Try to fetch user lead (if saved)
+      try {
+        const userLeadData = await api.userLeads.getById(leadId);
+        setUserLead(userLeadData);
+        setPriority(userLeadData.priority);
+        setStatus(userLeadData.currentStatus);
+        setNotes(userLeadData.notes || '');
+        
+        // Fetch activity
+        const activityData = await api.userLeads.getActivity(userLeadData._id);
+        setActivity(activityData);
+      } catch (err) {
+        // Lead not saved yet, that's ok
+        console.log('Lead not saved by user yet');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching lead:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      if (userLead) {
+        // Update existing
+        await api.userLeads.update(userLead._id, { priority, notes });
+        alert('Changes saved!');
+      } else {
+        // Create new
+        await api.userLeads.save({
+          leadId: lead._id,
+          priority,
+          notes
+        });
+        alert('Lead saved!');
+        fetchLeadDetails(); // Refresh
+      }
+    } catch (err) {
+      alert(`Error saving: ${err.message}`);
+    }
+  };
+
+  const handleStatusChange = async (e) => {
+    const newStatus = e.target.value;
+    
+    if (!userLead) {
+      alert('Please save the lead first');
+      return;
+    }
+    
+    try {
+      await api.userLeads.updateStatus(userLead._id, newStatus);
+      setStatus(newStatus);
+      fetchLeadDetails(); // Refresh activity
+    } catch (err) {
+      alert(`Error updating status: ${err.message}`);
+    }
+  };
+
+  const handleAddNote = async () => {
+    if (!newNote.trim()) return;
+    
+    const updatedNotes = notes ? `${notes}\n\n${newNote}` : newNote;
+    setNotes(updatedNotes);
+    setNewNote('');
+    
+    if (userLead) {
+      try {
+        await api.userLeads.update(userLead._id, { notes: updatedNotes });
+      } catch (err) {
+        alert(`Error saving note: ${err.message}`);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!userLead) {
+      navigate('/leads');
+      return;
+    }
+    
+    if (confirm('Remove this lead from your pipeline?')) {
+      try {
+        await api.userLeads.remove(userLead._id);
+        navigate('/pipeline');
+      } catch (err) {
+        alert(`Error deleting: ${err.message}`);
+      }
+    }
+  };
+
+  if (loading) {
+    return <div className="main"><div className="page-title">Loading...</div></div>;
+  }
+
+  if (error || !lead) {
+    return (
+      <div className="main">
+        <div className="page-title">Error loading lead</div>
+        <p>{error}</p>
+        <button onClick={() => navigate('/leads')}>Back to Leads</button>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <p>Lead ID: {leadId}</p>
-      <div className="main">
-        <div className="page-header">
-          <a href="javascript:history.back()" className="back-link">← back</a>
-          <div className="page-title">Engineering Manager</div>
-          <div className="page-subtitle">Anthropic | San Francisco, CA</div>
-        </div>
+    <div className="main">
+      <div className="page-header">
+        <button onClick={() => navigate(-1)} className="back-link">← back</button>
+        <div className="page-title">{lead.title}</div>
+        <div className="page-subtitle">{lead.company} | {lead.location}</div>
+      </div>
 
-        <div className="content-grid">
-          <div className="main-col">
-            <div className="section">
-              <div className="section-title">Basic Information</div>
-              <table className="form-table">
+      <div className="content-grid">
+        <div className="main-col">
+          <div className="section">
+            <div className="section-title">Basic Information</div>
+            <table className="form-table">
+              <tbody>
                 <tr>
                   <td>Position</td>
-                  <td><input type="text" defaultValue="Engineering Manager" />
-</td>
+                  <td><input type="text" value={lead.title} readOnly /></td>
                 </tr>
                 <tr>
                   <td>Company</td>
-                  <td><input type="text" defaultValue="Anthropic"/></td>
+                  <td><input type="text" value={lead.company} readOnly /></td>
                 </tr>
                 <tr>
                   <td>Location</td>
-                  <td><input type="text" defaultValue="San Francisco, CA"/></td>
+                  <td><input type="text" value={lead.location || 'N/A'} readOnly /></td>
                 </tr>
                 <tr>
                   <td>Compensation</td>
-                  <td><input type="text" defaultValue="$220k-$280k" className="comp-value"/></td>
+                  <td>
+                    <input 
+                      type="text" 
+                      value={lead.compensation?.raw || 'N/A'} 
+                      className="comp-value"
+                      readOnly 
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td>Priority</td>
                   <td>
-                    <select>
-                      <option selected>High</option>
-                      <option>Medium</option>
-                      <option>Low</option>
+                    <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
                     </select>
                   </td>
                 </tr>
                 <tr>
                   <td>Stage</td>
                   <td>
-                    <select>
-                      <option>New</option>
-                      <option>Applied</option>
-                      <option>Recruiter Screen</option>
-                      <option>Second Round</option>
-                      <option>Third Round</option>
-                      <option selected>Pending Offer</option>
-                      <option>Offer</option>
-                      <option>Rejected</option>
+                    <select value={status} onChange={handleStatusChange}>
+                      <option value="saved">Saved</option>
+                      <option value="applied">Applied</option>
+                      <option value="interviewing">Interviewing</option>
+                      <option value="offer">Offer</option>
+                      <option value="rejected">Rejected</option>
+                      <option value="archived">Archived</option>
                     </select>
                   </td>
                 </tr>
                 <tr>
                   <td>Industry</td>
-                  <td><input type="text" defaultValue="AI Research"/></td>
+                  <td><input type="text" value={lead.industry || 'N/A'} readOnly /></td>
                 </tr>
-                <tr>
-                  <td>Job URL</td>
-                  <td><input type="text" defaultValue="https://anthropic.com/careers/123"/></td>
-                </tr>
-              </table>
-            </div>
+                {lead.sourceApplicationLink && (
+                  <tr>
+                    <td>Job URL</td>
+                    <td>
+                      <a href={lead.sourceApplicationLink} target="_blank" rel="noopener noreferrer">
+                        {lead.sourceApplicationLink}
+                      </a>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-            <div className="section">
-              <div className="section-title">Contact Information</div>
-              <table className="form-table">
+          <div className="section">
+            <div className="section-title">Contact Information</div>
+            <table className="form-table">
+              <tbody>
                 <tr>
                   <td>Contact Name</td>
-                  <td><input type="text" defaultValue="David Kim"/></td>
+                  <td><input type="text" value={lead.contactName || 'N/A'} readOnly /></td>
                 </tr>
                 <tr>
-                  <td>Primary Email</td>
-                  <td><input type="text" defaultValue="david@anthropic.com"/></td>
-                </tr>
-                <tr>
-                  <td>Alt Email</td>
-                  <td><input type="text" defaultValue="d.kim@anthropic.com"/></td>
-                </tr>
-                <tr>
-                  <td>LinkedIn</td>
-                  <td><input type="text" defaultValue="linkedin.com/in/davidkim"/></td>
-                </tr>
-                <tr>
-                  <td>Phone</td>
-                  <td><input type="text" defaultValue="+1 (415) 555-0123"/></td>
+                  <td>Email</td>
+                  <td><input type="text" value={lead.contactEmail || 'N/A'} readOnly /></td>
                 </tr>
                 <tr>
                   <td>Notes</td>
-                  <td><textarea>Met David at AI Safety conference. Very interested in my background with distributed systems.</textarea></td>
+                  <td>
+                    <textarea 
+                      value={notes} 
+                      onChange={(e) => setNotes(e.target.value)}
+                      rows="4"
+                    />
+                  </td>
                 </tr>
-              </table>
-            </div>
-
-            <div className="actions">
-              <button className="btn btn-primary">Save Changes</button>
-              <button className="btn btn-danger">Delete Lead</button>
-            </div>
+              </tbody>
+            </table>
           </div>
 
-          <div className="side-col">
-            <div className="section">
-              <div className="section-title">Activity & Notes</div>
+          <div className="actions">
+            <button className="btn btn-primary" onClick={handleSave}>
+              {userLead ? 'Save Changes' : 'Save Lead'}
+            </button>
+            <button className="btn btn-danger" onClick={handleDelete}>
+              {userLead ? 'Remove from Pipeline' : 'Back'}
+            </button>
+          </div>
+        </div>
 
+        <div className="side-col">
+          <div className="section">
+            <div className="section-title">Activity & Notes</div>
+
+            {activity.map((item, index) => (
+              <div key={index} className="activity-item">
+                <div className="activity-meta">
+                  {new Date(item.createdAt).toLocaleString()} | {item.action}
+                </div>
+                <div className="activity-text">{item.description}</div>
+              </div>
+            ))}
+
+            {activity.length === 0 && userLead && (
               <div className="activity-item">
-                <div className="activity-meta">2 hours ago | system</div>
-                <div className="activity-text">Stage updated to "Pending Offer"</div>
+                <div className="activity-text">No activity yet</div>
               </div>
+            )}
 
-              <div className="activity-item">
-                <div className="activity-meta">1 day ago | john_doe</div>
-                <div className="activity-text">Final interview went really well. Discussed team structure and upcoming projects. David mentioned offer decision by end of week.</div>
-              </div>
-
-              <div className="activity-item">
-                <div className="activity-meta">3 days ago | system</div>
-                <div className="activity-text">Stage updated to "Third Round"</div>
-              </div>
-
-              <div className="activity-item">
-                <div className="activity-meta">5 days ago | john_doe</div>
-                <div className="activity-text">Technical interview scheduled for tomorrow 2pm PT. Preparing system design case study.</div>
-              </div>
-
-              <div className="activity-item">
-                <div className="activity-meta">1 week ago | system</div>
-                <div className="activity-text">Stage updated to "Second Round"</div>
-              </div>
-
-              <div className="activity-item">
-                <div className="activity-meta">1 week ago | john_doe</div>
-                <div className="activity-text">Great initial conversation with David. Team is focused on scaling Claude infrastructure. Looking for someone with my exact background.</div>
-              </div>
-
-              <div className="activity-item">
-                <div className="activity-meta">2 weeks ago | system</div>
-                <div className="activity-text">Lead saved to pipeline</div>
-              </div>
-
-              <div className="add-note">
-                <textarea placeholder="Add a note..."></textarea>
-                <button className="btn btn-primary">Add Note</button>
-              </div>
+            <div className="add-note">
+              <textarea 
+                placeholder="Add a note..."
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+              />
+              <button className="btn btn-primary" onClick={handleAddNote}>
+                Add Note
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </>
-
+    </div>
   );
 };
 

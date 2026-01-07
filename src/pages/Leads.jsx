@@ -1,202 +1,156 @@
-import './Leads.css'
-import {Link} from "react-router-dom";
+// Updated Leads.jsx component with API integration
+// Place this in: src/pages/Leads.jsx
 
-const Leads = () => (
-    <>
-        <div class="container">
-            <div class="main">
-                <div class="page-title">Leads</div>
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import './Leads.css';
+import api from '../api/client';
 
-                <div class="stats">
-                    <span>12 leads</span>
-                    <span>5 high priority</span>
-                    <span>8 active this week</span>
-                </div>
+const Leads = () => {
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    highPriority: 0,
+    activeThisWeek: 0
+  });
 
-                <div class="actions">
-                    <a href="#">refresh leads</a>
-                    <a href="#">filter</a>
-                </div>
+  // Fetch leads on component mount
+  useEffect(() => {
+    fetchLeads();
+  }, []);
 
-                <table class="leads-table">
-                    <thead>
-                        <tr>
-                            <th>Priority</th>
-                            <th>Position</th>
-                            <th>Company</th>
-                            <th>Location</th>
-                            <th>Compensation</th>
-                            <th>Contact</th>
-                            <th>Email</th>
-                            <th>Alt Email</th>
-                            <th>Stage</th>
-                            <th>Industry</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr >
-                            <td><span class="priority priority-high">High</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Senior Product Designer</Link></td>
-                            <td>Figma</td>
-                            <td>San Francisco, CA</td>
-                            <td><span class="comp">$165k-$195k</span></td>
-                            <td>Sarah Chen</td>
-                            <td>sarah.chen@figma.com</td>
-                            <td>s.chen@figma.com</td>
-                            <td><span class="stage">Recruiter Screen</span></td>
-                            <td>Design Tools</td>
-                            <td><button class="action-btn saved">✓ saved</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-high">High</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Staff Software Engineer</Link></td>
-                            <td>Stripe</td>
-                            <td>Remote</td>
-                            <td><span class="comp">$210k-$270k</span></td>
-                            <td>Michael Park</td>
-                            <td>m.park@stripe.com</td>
-                            <td>michael.park@stripe.com</td>
-                            <td><span class="stage">Second Round</span></td>
-                            <td>FinTech</td>
-                            <td><button class="action-btn">save</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-medium">Medium</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Product Manager</Link></td>
-                            <td>Notion</td>
-                            <td>New York, NY</td>
-                            <td><span class="comp">$155k-$180k</span></td>
-                            <td>Jessica Torres</td>
-                            <td>jessica@notion.so</td>
-                            <td>j.torres@notion.so</td>
-                            <td><span class="stage">Applied</span></td>
-                            <td>Productivity</td>
-                            <td><button class="action-btn">save</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-high">High</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Engineering Manager</Link></td>
-                            <td>Anthropic</td>
-                            <td>San Francisco, CA</td>
-                            <td><span class="comp">$220k-$280k</span></td>
-                            <td>David Kim</td>
-                            <td>david@anthropic.com</td>
-                            <td>d.kim@anthropic.com</td>
-                            <td><span class="stage">Pending Offer</span></td>
-                            <td>AI Research</td>
-                            <td><button class="action-btn saved">✓ saved</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-low">Low</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">UX Researcher</Link></td>
-                            <td>Spotify</td>
-                            <td>Stockholm, Sweden</td>
-                            <td><span class="comp">$140k-$165k</span></td>
-                            <td>Emma Larsson</td>
-                            <td>e.larsson@spotify.com</td>
-                            <td>emma.larsson@spotify.com</td>
-                            <td><span class="stage">New</span></td>
-                            <td>Music Streaming</td>
-                            <td><button class="action-btn">save</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-medium">Medium</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Data Scientist</Link></td>
-                            <td>Meta</td>
-                            <td>Menlo Park, CA</td>
-                            <td><span class="comp">$195k-$240k</span></td>
-                            <td>Alex Rodriguez</td>
-                            <td>arodriguez@meta.com</td>
-                            <td>a.rodriguez@meta.com</td>
-                            <td><span class="stage">Third Round</span></td>
-                            <td>Social Media</td>
-                            <td><button class="action-btn">save</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-high">High</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Frontend Engineer</Link></td>
-                            <td>Vercel</td>
-                            <td>Remote</td>
-                            <td><span class="comp">$175k-$210k</span></td>
-                            <td>Sophie Martin</td>
-                            <td>sophie@vercel.com</td>
-                            <td>s.martin@vercel.com</td>
-                            <td><span class="stage">Offer</span></td>
-                            <td>Web Infrastructure</td>
-                            <td><button class="action-btn saved">✓ saved</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-medium">Medium</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">DevOps Engineer</Link></td>
-                            <td>GitLab</td>
-                            <td>Austin, TX</td>
-                            <td><span class="comp">$160k-$185k</span></td>
-                            <td>Ryan O'Brien</td>
-                            <td>robrien@gitlab.com</td>
-                            <td>ryan.obrien@gitlab.com</td>
-                            <td><span class="stage">Recruiter Screen</span></td>
-                            <td>Developer Tools</td>
-                            <td><button class="action-btn">save</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-low">Low</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Marketing Manager</Link></td>
-                            <td>Airbnb</td>
-                            <td>Los Angeles, CA</td>
-                            <td><span class="comp">$125k-$150k</span></td>
-                            <td>Maya Patel</td>
-                            <td>maya.patel@airbnb.com</td>
-                            <td>m.patel@airbnb.com</td>
-                            <td><span class="stage">New</span></td>
-                            <td>Travel</td>
-                            <td><button class="action-btn">save</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-high">High</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Mobile Engineer</Link></td>
-                            <td>Coinbase</td>
-                            <td>Remote</td>
-                            <td><span class="comp">$185k-$230k</span></td>
-                            <td>James Wilson</td>
-                            <td>j.wilson@coinbase.com</td>
-                            <td>james.wilson@coinbase.com</td>
-                            <td><span class="stage">Second Round</span></td>
-                            <td>Cryptocurrency</td>
-                            <td><button class="action-btn">save</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-medium">Medium</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Security Engineer</Link></td>
-                            <td>OpenAI</td>
-                            <td>San Francisco, CA</td>
-                            <td><span class="comp">$200k-$250k</span></td>
-                            <td>Lisa Zhang</td>
-                            <td>lisa@openai.com</td>
-                            <td>l.zhang@openai.com</td>
-                            <td><span class="stage">Applied</span></td>
-                            <td>AI Research</td>
-                            <td><button class="action-btn">save</button></td>
-                        </tr>
-                        <tr >
-                            <td><span class="priority priority-low">Low</span></td>
-                            <td><Link to="/leads/lead-detail-template" class="position-link">Content Strategist</Link></td>
-                            <td>Shopify</td>
-                            <td>Ottawa, Canada</td>
-                            <td><span class="comp">$145k-$170k</span></td>
-                            <td>Chris Anderson</td>
-                            <td>c.anderson@shopify.com</td>
-                            <td>chris.anderson@shopify.com</td>
-                            <td><span class="stage">Third Round</span></td>
-                            <td>E-commerce</td>
-                            <td><button class="action-btn saved">✓ saved</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+  const fetchLeads = async () => {
+    try {
+      setLoading(true);
+      const response = await api.leads.getAll({ page: 1, limit: 50 });
+      setLeads(response.leads || []);
+      
+      // Calculate stats (you can also create a separate API endpoint for this)
+      setStats({
+        total: response.totalLeads || 0,
+        highPriority: 5, // This would come from your API
+        activeThisWeek: 8 // This would come from your API
+      });
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching leads:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveLead = async (leadId) => {
+    try {
+      await api.userLeads.save({
+        leadId,
+        priority: 'medium'
+      });
+      // Refresh leads or update UI
+      alert('Lead saved successfully!');
+    } catch (err) {
+      alert(`Error saving lead: ${err.message}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="main">
+          <div className="page-title">Loading leads...</div>
         </div>
-    </>
+      </div>
+    );
+  }
 
-)
+  if (error) {
+    return (
+      <div className="container">
+        <div className="main">
+          <div className="page-title">Error loading leads</div>
+          <p>{error}</p>
+          <button onClick={fetchLeads}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container">
+      <div className="main">
+        <div className="page-title">Leads</div>
+
+        <div className="stats">
+          <span>{stats.total} leads</span>
+          <span>{stats.highPriority} high priority</span>
+          <span>{stats.activeThisWeek} active this week</span>
+        </div>
+
+        <div className="actions">
+          <button onClick={fetchLeads}>Refresh leads</button>
+          <a href="#">Filter</a>
+        </div>
+
+        <table className="leads-table">
+          <thead>
+            <tr>
+              <th>Priority</th>
+              <th>Position</th>
+              <th>Company</th>
+              <th>Location</th>
+              <th>Compensation</th>
+              <th>Contact</th>
+              <th>Email</th>
+              <th>Industry</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {leads.map((lead) => (
+              <tr key={lead._id}>
+                <td>
+                  <span className="priority priority-medium">Medium</span>
+                </td>
+                <td>
+                  <Link to={`/leads/${lead._id}`} className="position-link">
+                    {lead.title}
+                  </Link>
+                </td>
+                <td>{lead.company}</td>
+                <td>{lead.location}</td>
+                <td>
+                  <span className="comp">
+                    {lead.compensation?.raw || 
+                     (lead.compensation?.min && lead.compensation?.max 
+                       ? `$${lead.compensation.min}-$${lead.compensation.max}` 
+                       : 'N/A')}
+                  </span>
+                </td>
+                <td>{lead.contactName || 'N/A'}</td>
+                <td>{lead.contactEmail || 'N/A'}</td>
+                <td>{lead.industry || 'N/A'}</td>
+                <td>
+                  <button 
+                    className="action-btn"
+                    onClick={() => handleSaveLead(lead._id)}
+                  >
+                    Save
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {leads.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <p>No leads found. Import your CSV to get started!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default Leads;
