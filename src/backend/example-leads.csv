@@ -1,0 +1,11 @@
+title,company,location,team,compensation,contactName,contactEmail,sourceLink,sourceApplicationLink,datePosted,industry
+Software Engineer,Apple,Cupertino CA,Engineering,150000-175000,Sarah Chen,sarah@apple.com,https://linkedin.com/jobs/apple-swe,https://jobs.apple.com/en-us/details/200123456,2026-01-05,Technology
+Senior Product Manager,Google,Mountain View CA,Product,180000-220000,Michael Park,michael@google.com,https://linkedin.com/jobs/google-pm,https://careers.google.com/jobs/results/123456,2026-01-04,Technology
+Data Scientist,Meta,Remote,Data Science,165000-210000,Jessica Torres,jessica@meta.com,https://linkedin.com/jobs/meta-ds,https://www.metacareers.com/jobs/123456,2026-01-03,Social Media
+Frontend Engineer,Vercel,Remote,Engineering,160000-195000,Alex Kim,alex@vercel.com,https://linkedin.com/jobs/vercel-fe,https://vercel.com/careers/123,2026-01-06,Web Infrastructure
+DevOps Engineer,Amazon,Seattle WA,Cloud Infrastructure,145000-185000,David Liu,david@amazon.com,https://linkedin.com/jobs/amazon-devops,https://amazon.jobs/en/jobs/123456,2026-01-02,E-commerce
+UX Designer,Figma,San Francisco CA,Design,155000-190000,Emma Wilson,emma@figma.com,https://linkedin.com/jobs/figma-ux,https://figma.com/careers/123,2025-12-28,Design Tools
+Machine Learning Engineer,OpenAI,San Francisco CA,Research,190000-250000,Ryan Chen,ryan@openai.com,https://linkedin.com/jobs/openai-ml,https://openai.com/careers/123,2026-01-01,AI Research
+Backend Engineer,Stripe,Remote,Payments,175000-215000,Sophie Martin,sophie@stripe.com,https://linkedin.com/jobs/stripe-backend,https://stripe.com/jobs/123,2025-12-30,FinTech
+Product Designer,Notion,New York NY,Product Design,145000-175000,James Anderson,james@notion.so,https://linkedin.com/jobs/notion-pd,https://notion.so/careers/123,2025-12-29,Productivity
+Security Engineer,Coinbase,Remote,Security,170000-220000,Lisa Zhang,lisa@coinbase.com,https://linkedin.com/jobs/coinbase-security,https://coinbase.com/careers/positions/123,2026-01-07,Cryptocurrency
