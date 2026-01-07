@@ -18,7 +18,7 @@ const LeadDetail = () => {
   
   // Form state
   const [priority, setPriority] = useState('medium');
-  const [status, setStatus] = useState('saved');
+  const [status, setStatus] = useState(null);
   const [notes, setNotes] = useState('');
   const [newNote, setNewNote] = useState('');
 
@@ -50,7 +50,7 @@ const LeadDetail = () => {
         console.log('Lead not saved by user yet');
         // Keep default values
         setPriority('medium');
-        setStatus('saved');
+        setStatus(null);
         setNotes('');
         setActivity([]);
       }
@@ -214,29 +214,16 @@ const LeadDetail = () => {
                   </td>
                 </tr>
                 <tr>
-                  <td>Stage</td>
-                  <td>
-                    <select value={status} onChange={handleStatusChange}>
-                      <option value="saved">Saved</option>
-                      <option value="applied">Applied</option>
-                      <option value="interviewing">Interviewing</option>
-                      <option value="offer">Offer</option>
-                      <option value="rejected">Rejected</option>
-                      <option value="archived">Archived</option>
-                    </select>
-                  </td>
-                </tr>
-                <tr>
                   <td>Industry</td>
                   <td><input type="text" value={lead.industry || 'N/A'} readOnly /></td>
                 </tr>
                 <tr>
                   <td>Date Posted</td>
                   <td>
-                    <input 
-                      type="text" 
-                      value={lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A'} 
-                      readOnly 
+                    <input
+                      type="text"
+                      value={lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A'}
+                      readOnly
                     />
                   </td>
                 </tr>
@@ -260,6 +247,48 @@ const LeadDetail = () => {
                     </td>
                   </tr>
                 )}
+                <tr>
+                  <td>Stage</td>
+                  <td>
+                    <select value={status || ''} onChange={handleStatusChange} disabled={!userLead}>
+                      {!status && <option value="">Not saved yet</option>}
+                      <option value="saved">Saved</option>
+                      <option value="applied">Applied</option>
+                      <option value="interviewing">Interviewing</option>
+                      <option value="offer">Offer</option>
+                      <option value="rejected">Rejected</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>
+                    {userLead ? (
+                      <button className="btn btn-primary saved-lead-btn" disabled>
+                        Saved
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-primary save-lead-btn"
+                        onClick={async () => {
+                          try {
+                            await api.userLeads.save({
+                              leadId: lead._id,
+                              priority,
+                              notes
+                            });
+                            await fetchLeadDetails();
+                          } catch (err) {
+                            alert(`Error saving lead: ${err.message}`);
+                          }
+                        }}
+                      >
+                        Save Lead
+                      </button>
+                    )}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -321,7 +350,7 @@ const LeadDetail = () => {
           <div className="section">
             <div className="section-title">Activity & Timeline</div>
 
-            {userLead && (
+            {userLead && status && (
               <div className="lead-status-badge">
                 <strong>Current Status:</strong> {status}
               </div>

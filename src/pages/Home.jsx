@@ -1,221 +1,175 @@
-import './Home.css'
-import { Link } from "react-router";
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import './Home.css';
+import api from '../api/client';
 
-const Home = () => (
-    <>
-        <div class="container">
-            <div class="main">
-                <div class="section">
-                    <div class="section-header">
-                        <span>Pipeline</span>
-                        <a href="my-pipeline-view-hn.html">view all</a>
-                    </div>
-                    <div class="pipeline">
-                        <div class="pipeline-col">
-                            <div class="pipeline-col-header">
-                                <span>Saved</span>
-                                <span class="count">2</span>
-                            </div>
-                            <div class="job-item">
-                                <div class="job-company">Spotify</div>
-                                <div class="job-title">
-                                    <a href="lead-detail-view-hn.html">UX Researcher</a>
-                                </div>
-                                <div class="job-meta">
-                                    Stockholm | <span class="job-comp">$140k-$165k</span>
-                                </div>
-                            </div>
-                            <div class="job-item">
-                                <div class="job-company">Stripe</div>
-                                <div class="job-title">
-                                    <a href="lead-detail-view-hn.html">Staff Software Engineer</a>
-                                </div>
-                                <div class="job-meta">
-                                    Remote | <span class="job-comp">$210k-$270k</span>
-                                </div>
-                            </div>
-                        </div>
+const Home = () => {
+  const location = useLocation();
+  const [pipeline, setPipeline] = useState([]);
+  const [recentLeads, setRecentLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-                        <div class="pipeline-col">
-                            <div class="pipeline-col-header">
-                                <span>Applied</span>
-                                <span class="count">2</span>
-                            </div>
-                            <div class="job-item">
-                                <div class="job-company">Notion</div>
-                                <div class="job-title">
-                                    <a href="lead-detail-view-hn.html">Product Manager</a>
-                                </div>
-                                <div class="job-meta">
-                                    New York, NY | <span class="job-comp">$155k-$180k</span>
-                                </div>
-                            </div>
-                            <div class="job-item">
-                                <div class="job-company">OpenAI</div>
-                                <div class="job-title">
-                                    <a href="lead-detail-view-hn.html">Security Engineer</a>
-                                </div>
-                                <div class="job-meta">
-                                    San Francisco | <span class="job-comp">$200k-$250k</span>
-                                </div>
-                            </div>
-                        </div>
+  useEffect(() => {
+    fetchData();
+  }, [location]);
 
-                        <div class="pipeline-col">
-                            <div class="pipeline-col-header">
-                                <span>Interviewing</span>
-                                <span class="count">3</span>
-                            </div>
-                            <div class="job-item">
-                                <div class="job-company">Figma</div>
-                                <div class="job-title">
-                                    <a href="lead-detail-view-hn.html">Senior Product Designer</a>
-                                </div>
-                                <div class="job-meta">
-                                    San Francisco | <span class="job-comp">$165k-$195k</span>
-                                </div>
-                            </div>
-                            <div class="job-item">
-                                <div class="job-company">Coinbase</div>
-                                <div class="job-title">
-                                    <a href="lead-detail-view-hn.html">Mobile Engineer</a>
-                                </div>
-                                <div class="job-meta">
-                                    Remote | <span class="job-comp">$185k-$230k</span>
-                                </div>
-                            </div>
-                            <div class="job-item">
-                                <div class="job-company">Meta</div>
-                                <div class="job-title">
-                                    <a href="lead-detail-view-hn.html">Data Scientist</a>
-                                </div>
-                                <div class="job-meta">
-                                    Menlo Park | <span class="job-comp">$195k-$240k</span>
-                                </div>
-                            </div>
-                        </div>
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-                        <div class="pipeline-col">
-                            <div class="pipeline-col-header">
-                                <span>Offer</span>
-                                <span class="count">1</span>
-                            </div>
-                            <div class="job-item">
-                                <div class="job-company">Vercel</div>
-                                <div class="job-title">
-                                    <a href="lead-detail-view-hn.html">Frontend Engineer</a>
-                                </div>
-                                <div class="job-meta">
-                                    Remote | <span class="job-comp">$175k-$210k</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      // Fetch pipeline data
+      const pipelineData = await api.userLeads.getPipeline();
+      setPipeline(pipelineData);
 
-                <div class="two-col">
-                    <div class="list-section">
-                        <div class="section-header">
-                            <span>Recent Messages</span>
-                            <a href="#">view all</a>
-                        </div>
-                        <div class="list-item">
-                            <div class="unread-dot"></div>
-                            <div class="item-content">
-                                <div class="item-title">
-                                    <a href="#">Offer Letter - Frontend Engineer</a>
-                                </div>
-                                <div class="item-meta">
-                                    from Sophie Martin at Vercel | 2 hours ago
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-item">
-                            <div class="item-content">
-                                <div class="item-title">
-                                    <a href="#">Re: Engineering Manager Interview</a>
-                                </div>
-                                <div class="item-meta">
-                                    from David Kim at Anthropic | 5 hours ago
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-item">
-                            <div class="item-content">
-                                <div class="item-title">
-                                    <a href="#">Next Steps - Figma Design Role</a>
-                                </div>
-                                <div class="item-meta">
-                                    from Sarah Chen at Figma | 1 day ago
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-item">
-                            <div class="item-content">
-                                <div class="item-title">
-                                    <a href="#">Coinbase Technical Round Schedule</a>
-                                </div>
-                                <div class="item-meta">
-                                    from James Wilson at Coinbase | 2 days ago
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+      // Fetch recent leads (for "New Leads for You" section)
+      try {
+        const leadsData = await api.leads.getAll({ page: 1, limit: 4 });
+        setRecentLeads(leadsData.leads || []);
+      } catch (err) {
+        console.error('Error fetching recent leads:', err);
+      }
+    } catch (err) {
+      console.error('Error fetching pipeline:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                    <div class="list-section">
-                        <div class="section-header">
-                            <span>New Leads for You</span>
-                            <a href="job-leads-mock-hn.html">view all</a>
-                        </div>
-                        <div class="list-item" >
-                            <div class="item-number">1.</div>
-                            <div class="item-content">
-                                <div class="item-title">
-                                    <a href="job-leads-mock-hn.html">DevOps Engineer</a>
-                                </div>
-                                <div class="item-meta">
-                                    GitLab | Austin, TX | <span class="job-comp">$160k-$185k</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-item" >
-                            <div class="item-number">2.</div>
-                            <div class="item-content">
-                                <div class="item-title">
-                                    <a href="job-leads-mock-hn.html">Marketing Manager</a>
-                                </div>
-                                <div class="item-meta">
-                                    Airbnb | Los Angeles | <span class="job-comp">$125k-$150k</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-item">
-                            <div class="item-number">3.</div>
-                            <div class="item-content">
-                                <div class="item-title">
-                                    <a href="job-leads-mock-hn.html">Mobile Engineer</a>
-                                </div>
-                                <div class="item-meta">
-                                    Coinbase | Remote | <span class="job-comp">$185k-$230k</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-item" >
-                            <div class="item-number">4.</div>
-                            <div class="item-content">
-                                <div class="item-title">
-                                    <a href="job-leads-mock-hn.html">Content Strategist</a>
-                                </div>
-                                <div class="item-meta">
-                                    Shopify | Ottawa | <span class="job-comp">$145k-$170k</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  // Helper to get leads for a specific status (limit to 3 for home page)
+  const getLeadsByStatus = (status, limit = 3) => {
+    const stage = pipeline.find(s => s._id === status);
+    const leads = stage?.leads || [];
+    return leads.slice(0, limit);
+  };
+
+  // Status display mapping
+  const statusColumns = [
+    { id: 'saved', title: 'Saved' },
+    { id: 'applied', title: 'Applied' },
+    { id: 'interviewing', title: 'Interviewing' },
+    { id: 'offer', title: 'Offer' }
+  ];
+
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="main">
+          <div className="section">
+            <div className="section-header">
+              <span>Loading...</span>
             </div>
+          </div>
         </div>
-    </>
-)
+      </div>
+    );
+  }
 
-export default Home
+  return (
+    <div className="container">
+      <div className="main">
+        <div className="section">
+          <div className="section-header">
+            <span>Pipeline</span>
+            <Link to="/pipeline">view pipeline</Link>
+          </div>
+          <div className="pipeline">
+            {statusColumns.map(column => {
+              const leads = getLeadsByStatus(column.id);
+              const totalCount = pipeline.find(s => s._id === column.id)?.count || 0;
+
+              return (
+                <div key={column.id} className="pipeline-col">
+                  <div className="pipeline-col-header">
+                    <span>{column.title}</span>
+                    <span className="count">{totalCount}</span>
+                  </div>
+                  {leads.length > 0 ? (
+                    leads.map(({ userLead, leadDetails }) => (
+                      <div
+                        key={userLead._id}
+                        className="job-item"
+                        onClick={() => window.location.href = `/leads/${leadDetails._id}`}
+                      >
+                        <div className="job-company">{leadDetails.company}</div>
+                        <div className="job-title">
+                          <Link to={`/leads/${leadDetails._id}`}>
+                            {leadDetails.title}
+                          </Link>
+                        </div>
+                        <div className="job-meta">
+                          {leadDetails.location} | <span className="job-comp">
+                            {leadDetails.compensation?.raw || 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="job-item" style={{ color: '#828282', fontStyle: 'italic' }}>
+                      No {column.title.toLowerCase()} leads
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="two-col">
+          <div className="list-section">
+            <div className="section-header">
+              <span>Recent Messages</span>
+              <a href="#">view messages</a>
+            </div>
+            <div className="list-item">
+              <div className="item-content">
+                <div className="item-title">
+                  <span style={{ color: '#828282', fontStyle: 'italic' }}>No messages yet</span>
+                </div>
+                <div className="item-meta">
+                  Messages feature coming soon
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="list-section">
+            <div className="section-header">
+              <span>New Leads for You</span>
+              <Link to="/leads">view all leads</Link>
+            </div>
+            {recentLeads.length > 0 ? (
+              recentLeads.map((lead, index) => (
+                <div key={lead._id} className="list-item">
+                  <div className="item-number">{index + 1}.</div>
+                  <div className="item-content">
+                    <div className="item-title">
+                      <Link to={`/leads/${lead._id}`}>{lead.title}</Link>
+                    </div>
+                    <div className="item-meta">
+                      {lead.company} | {lead.location} | <span className="job-comp">
+                        {lead.compensation?.raw || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="list-item">
+                <div className="item-content">
+                  <div className="item-title">
+                    <span style={{ color: '#828282', fontStyle: 'italic' }}>No leads available yet</span>
+                  </div>
+                  <div className="item-meta">
+                    Check back soon for new opportunities
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Home;

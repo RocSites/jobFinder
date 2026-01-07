@@ -193,6 +193,17 @@
      background: #ffe6e6;
  }
 
+ .saved-lead-btn {
+     background: #e6ffe6 !important;
+     color: #00a000 !important;
+     border-color: #00a000 !important;
+     cursor: not-allowed !important;
+ }
+
+ .saved-lead-btn:hover {
+     background: #e6ffe6 !important;
+ }
+
  /* Activity section */
  .activity-item {
      padding: 6px 0;

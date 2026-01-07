@@ -9,8 +9,8 @@ const Header = () => (
                 <nav className="nav">
                     <Link to="/leads">leads</Link>
                     <Link to="/pipeline">pipeline</Link>
-                    <Link to="/">interviews</Link>
-                    <Link to="/">messages</Link>
+                    {/* <Link to="/">interviews</Link> */}
+                    {/* <Link to="/">messages</Link> */}
                 </nav>
                 <div className="spacer"></div>
                 <span className="user-info">doug_k | logout</span>

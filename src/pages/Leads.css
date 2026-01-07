@@ -197,6 +197,11 @@
      background: #e6ffe6;
      color: #00a000;
      border-color: #00a000;
+     cursor: not-allowed;
+ }
+
+ .action-btn.saved:hover {
+     background: #e6ffe6;
  }
 
  /* Stats */

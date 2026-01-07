@@ -9,6 +9,7 @@ import api from '../api/client';
 const Leads = () => {
   const location = useLocation();
   const [leads, setLeads] = useState([]);
+  const [savedLeads, setSavedLeads] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({
@@ -27,7 +28,14 @@ const Leads = () => {
       setLoading(true);
       const response = await api.leads.getAll({ page: 1, limit: 50 });
       setLeads(response.leads || []);
-      
+
+      // Fetch saved leads to know which ones are already saved
+      const userLeadsResponse = await api.userLeads.getAll();
+      const savedLeadIds = new Set(
+        userLeadsResponse.map(ul => ul.leadId?._id || ul.leadId).filter(Boolean)
+      );
+      setSavedLeads(savedLeadIds);
+
       // Calculate stats (you can also create a separate API endpoint for this)
       setStats({
         total: response.totalLeads || 0,
@@ -48,8 +56,8 @@ const Leads = () => {
         leadId,
         priority: 'medium'
       });
-      // Refresh leads or update UI
-      alert('Lead saved successfully!');
+      // Update saved leads set
+      setSavedLeads(prev => new Set([...prev, leadId]));
     } catch (err) {
       alert(`Error saving lead: ${err.message}`);
     }
@@ -132,12 +140,18 @@ const Leads = () => {
                 <td>{lead.contactEmail || 'N/A'}</td>
                 <td>{lead.industry || 'N/A'}</td>
                 <td>
-                  <button 
-                    className="action-btn"
-                    onClick={() => handleSaveLead(lead._id)}
-                  >
-                    Save
-                  </button>
+                  {savedLeads.has(lead._id) ? (
+                    <button className="action-btn saved" disabled>
+                      Saved
+                    </button>
+                  ) : (
+                    <button
+                      className="action-btn"
+                      onClick={() => handleSaveLead(lead._id)}
+                    >
+                      Save
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
