@@ -27,7 +27,7 @@ export const leadsAPI = {
   },
 
   // Get single lead by ID
-  getById: (id) => fetchAPI(`/leads/${id}`),
+  getById: (id) => fetchAPI(`/leads?id=${id}`),
 
   // Create new lead
   create: (data) => fetchAPI('/leads', {
@@ -36,13 +36,13 @@ export const leadsAPI = {
   }),
 
   // Update lead
-  update: (id, data) => fetchAPI(`/leads/${id}`, {
+  update: (id, data) => fetchAPI(`/leads?id=${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
 
   // Delete lead
-  delete: (id) => fetchAPI(`/leads/${id}`, {
+  delete: (id) => fetchAPI(`/leads?id=${id}`, {
     method: 'DELETE',
   }),
 };
@@ -63,20 +63,23 @@ export const userLeadsAPI = {
 
   // Get single user lead by UserLead ID
   getById: (id, userId = '') => {
-    const query = userId ? `?userId=${userId}` : '';
-    return fetchAPI(`/user-leads/${id}${query}`);
+    const params = new URLSearchParams({ id });
+    if (userId) params.append('userId', userId);
+    return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
   // Get user lead by LEAD ID (not UserLead ID) - NEW!
   getByLeadId: (leadId, userId = '') => {
-    const query = userId ? `?userId=${userId}` : '';
-    return fetchAPI(`/user-leads/by-lead/${leadId}${query}`);
+    const params = new URLSearchParams({ leadId });
+    if (userId) params.append('userId', userId);
+    return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
   // Get activity timeline for a lead
   getActivity: (id, userId = '') => {
-    const query = userId ? `?userId=${userId}` : '';
-    return fetchAPI(`/user-leads/${id}/activity${query}`);
+    const params = new URLSearchParams({ id, activity: 'true' });
+    if (userId) params.append('userId', userId);
+    return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
   // Save a lead
@@ -86,21 +89,22 @@ export const userLeadsAPI = {
   }),
 
   // Update user lead (priority, notes, etc.)
-  update: (id, data) => fetchAPI(`/user-leads/${id}`, {
+  update: (id, data) => fetchAPI(`/user-leads?id=${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
 
   // Update pipeline status
-  updateStatus: (id, status, note = '') => fetchAPI(`/user-leads/${id}/status`, {
+  updateStatus: (id, status, note = '') => fetchAPI(`/user-leads?id=${id}`, {
     method: 'PUT',
     body: JSON.stringify({ status, note }),
   }),
 
   // Remove saved lead
   remove: (id, userId = '') => {
-    const query = userId ? `?userId=${userId}` : '';
-    return fetchAPI(`/user-leads/${id}${query}`, {
+    const params = new URLSearchParams({ id });
+    if (userId) params.append('userId', userId);
+    return fetchAPI(`/user-leads?${params.toString()}`, {
       method: 'DELETE',
     });
   },
