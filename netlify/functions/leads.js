@@ -40,7 +40,8 @@ export const handler = async (event) => {
     if (event.httpMethod === 'POST') {
       const data = JSON.parse(event.body);
       const result = await collection.insertOne(data);
-      return { statusCode: 201, body: JSON.stringify(result.ops[0]) };
+      const insertedDoc = await collection.findOne({ _id: result.insertedId });
+      return { statusCode: 201, body: JSON.stringify(insertedDoc) };
     }
 
     // PUT

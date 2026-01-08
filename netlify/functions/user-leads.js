@@ -49,8 +49,30 @@ export const handler = async (event) => {
     // POST
     if (event.httpMethod === 'POST') {
       const data = JSON.parse(event.body);
-      const result = await collection.insertOne(data);
-      return { statusCode: 201, body: JSON.stringify(result.ops[0]) };
+
+      // Create a proper userLead document with defaults
+      const userLeadDoc = {
+        userId: data.userId || 'user123', // Default user for now
+        leadId: new ObjectId(data.leadId),
+        currentStatus: data.status || 'saved',
+        statusHistory: [
+          {
+            status: data.status || 'saved',
+            timestamp: new Date().toISOString(),
+            note: 'Lead saved to pipeline'
+          }
+        ],
+        priority: data.priority || 'medium',
+        notes: data.notes || '',
+        savedAt: new Date().toISOString(),
+        lastActivityAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const result = await collection.insertOne(userLeadDoc);
+      const insertedDoc = await collection.findOne({ _id: result.insertedId });
+      return { statusCode: 201, body: JSON.stringify(insertedDoc) };
     }
 
     // PUT
