@@ -27,7 +27,13 @@ export const handler = async (event) => {
         return { statusCode: 200, body: JSON.stringify(lead) };
       }
       const allLeads = await collection.find({}).toArray();
-      return { statusCode: 200, body: JSON.stringify(allLeads) };
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          leads: allLeads,
+          totalLeads: allLeads.length
+        })
+      };
     }
 
     // POST
