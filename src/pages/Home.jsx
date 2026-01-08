@@ -100,6 +100,11 @@ const Home = () => {
                           {leadDetails.location} | <span className="job-comp">
                             {leadDetails.compensation?.raw || 'N/A'}
                           </span>
+                          {userLead.priority && (
+                            <span className={`priority-badge priority-${userLead.priority}`}>
+                              {userLead.priority}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))
