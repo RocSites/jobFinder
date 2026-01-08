@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/.netlify/functions';
 
 // Helper function for API calls
 const fetchAPI = async (endpoint, options = {}) => {
@@ -58,7 +58,7 @@ export const userLeadsAPI = {
   // Get pipeline view (grouped by status)
   getPipeline: (userId = '') => {
     const query = userId ? `?userId=${userId}` : '';
-    return fetchAPI(`/user-leads/pipeline${query}`);
+    return fetchAPI(`/pipeline${query}`);
   },
 
   // Get single user lead by UserLead ID
