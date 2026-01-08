@@ -34,13 +34,33 @@ export const handler = async () => {
         }
       },
       {
+        // Add a field to separate userLead from leadDetails before grouping
+        $addFields: {
+          userLeadData: {
+            _id: '$_id',
+            userId: '$userId',
+            leadId: '$leadId',
+            currentStatus: '$currentStatus',
+            statusHistory: '$statusHistory',
+            priority: '$priority',
+            notes: '$notes',
+            savedAt: '$savedAt',
+            lastActivityAt: '$lastActivityAt',
+            createdAt: '$createdAt',
+            updatedAt: '$updatedAt',
+            appliedAt: '$appliedAt',
+            interviewingAt: '$interviewingAt'
+          }
+        }
+      },
+      {
         // Group by status
         $group: {
           _id: '$currentStatus',
           count: { $sum: 1 },
           leads: {
             $push: {
-              userLead: '$$ROOT',
+              userLead: '$userLeadData',
               leadDetails: '$leadDetails'
             }
           }
