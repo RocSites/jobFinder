@@ -9,13 +9,14 @@ import './LeadDetail.css';
 const LeadDetail = () => {
   const { leadId } = useParams();
   const navigate = useNavigate();
-  
+  const isNewLead = leadId === 'new';
+
   const [lead, setLead] = useState(null);
   const [userLead, setUserLead] = useState(null);
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Form state
   const [priority, setPriority] = useState('medium');
   const [status, setStatus] = useState(null);
@@ -23,8 +24,28 @@ const LeadDetail = () => {
   const [newNote, setNewNote] = useState('');
 
   useEffect(() => {
-    fetchLeadDetails();
-  }, [leadId]);
+    if (isNewLead) {
+      // Initialize empty lead for new entry
+      setLead({
+        title: '',
+        company: '',
+        location: '',
+        team: '',
+        compensation: { raw: '' },
+        industry: '',
+        datePosted: '',
+        contactName: '',
+        contactEmail: '',
+        contactLinkedIn: '',
+        sourceApplicationLink: '',
+        sourceLink: ''
+      });
+      setStatus('saved'); // Auto-set to saved for new leads
+      setLoading(false);
+    } else {
+      fetchLeadDetails();
+    }
+  }, [leadId, isNewLead]);
 
   const fetchLeadDetails = async () => {
     try {
@@ -64,13 +85,42 @@ const LeadDetail = () => {
 
   const handleSave = async () => {
     try {
-      if (userLead) {
+      if (isNewLead) {
+        // Create new lead first, then create userLead
+        const newLeadData = {
+          title: lead.title,
+          company: lead.company,
+          location: lead.location,
+          team: lead.team,
+          compensation: { raw: lead.compensation?.raw || '' },
+          industry: lead.industry,
+          datePosted: lead.datePosted || new Date(),
+          contactName: lead.contactName,
+          contactEmail: lead.contactEmail,
+          contactLinkedIn: lead.contactLinkedIn,
+          sourceApplicationLink: lead.sourceApplicationLink,
+          sourceLink: lead.sourceLink
+        };
+
+        const createdLead = await api.leads.create(newLeadData);
+
+        // Now create userLead with status 'saved'
+        await api.userLeads.save({
+          leadId: createdLead._id,
+          priority,
+          notes,
+          currentStatus: 'saved'
+        });
+
+        alert('Lead created and saved to pipeline!');
+        navigate(`/leads/${createdLead._id}`);
+      } else if (userLead) {
         // Update existing
         await api.userLeads.update(userLead._id, { priority, notes });
         alert('Changes saved!');
         fetchLeadDetails(); // Refresh to get latest data
       } else {
-        // Create new
+        // Create new userLead for existing lead
         await api.userLeads.save({
           leadId: lead._id,
           priority,
@@ -166,8 +216,8 @@ const LeadDetail = () => {
     <div className="main">
       <div className="page-header">
         <button onClick={() => navigate(-1, { state: { refresh: Date.now() } })} className="back-link">← back</button>
-        <div className="page-title">{lead.title}</div>
-        <div className="page-subtitle">{lead.company} | {lead.location}</div>
+        <div className="page-title">{isNewLead ? 'Add New Lead' : lead.title}</div>
+        {!isNewLead && <div className="page-subtitle">{lead.company} | {lead.location}</div>}
       </div>
 
       <div className="content-grid">
@@ -178,28 +228,62 @@ const LeadDetail = () => {
               <tbody>
                 <tr>
                   <td>Position</td>
-                  <td><input type="text" value={lead.title} readOnly /></td>
+                  <td>
+                    <input
+                      type="text"
+                      value={lead.title}
+                      onChange={(e) => setLead({...lead, title: e.target.value})}
+                      readOnly={!isNewLead}
+                      placeholder={isNewLead ? "e.g. Senior Software Engineer" : ""}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td>Company</td>
-                  <td><input type="text" value={lead.company} readOnly /></td>
+                  <td>
+                    <input
+                      type="text"
+                      value={lead.company}
+                      onChange={(e) => setLead({...lead, company: e.target.value})}
+                      readOnly={!isNewLead}
+                      placeholder={isNewLead ? "e.g. Acme Corp" : ""}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td>Location</td>
-                  <td><input type="text" value={lead.location || 'N/A'} readOnly /></td>
+                  <td>
+                    <input
+                      type="text"
+                      value={lead.location || ''}
+                      onChange={(e) => setLead({...lead, location: e.target.value})}
+                      readOnly={!isNewLead}
+                      placeholder={isNewLead ? "e.g. San Francisco, CA or Remote" : ""}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td>Team</td>
-                  <td><input type="text" value={lead.team || 'N/A'} readOnly /></td>
+                  <td>
+                    <input
+                      type="text"
+                      value={lead.team || ''}
+                      onChange={(e) => setLead({...lead, team: e.target.value})}
+                      readOnly={!isNewLead}
+                      placeholder={isNewLead ? "e.g. Engineering" : ""}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td>Compensation</td>
                   <td>
-                    <input 
-                      type="text" 
-                      value={lead.compensation?.raw || 'N/A'} 
+                    <input
+                      type="text"
+                      value={lead.compensation?.raw || ''}
+                      onChange={(e) => setLead({...lead, compensation: {raw: e.target.value}})}
                       className="comp-value"
-                      readOnly 
+                      readOnly={!isNewLead}
+                      placeholder={isNewLead ? "e.g. $120k - $180k" : ""}
                     />
                   </td>
                 </tr>
@@ -215,43 +299,70 @@ const LeadDetail = () => {
                 </tr>
                 <tr>
                   <td>Industry</td>
-                  <td><input type="text" value={lead.industry || 'N/A'} readOnly /></td>
+                  <td>
+                    <input
+                      type="text"
+                      value={lead.industry || ''}
+                      onChange={(e) => setLead({...lead, industry: e.target.value})}
+                      readOnly={!isNewLead}
+                      placeholder={isNewLead ? "e.g. Technology, Finance" : ""}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td>Date Posted</td>
                   <td>
                     <input
-                      type="text"
-                      value={lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A'}
-                      readOnly
+                      type={isNewLead ? "date" : "text"}
+                      value={isNewLead ? (lead.datePosted || '') : (lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A')}
+                      onChange={(e) => setLead({...lead, datePosted: e.target.value})}
+                      readOnly={!isNewLead}
                     />
                   </td>
                 </tr>
-                {lead.sourceApplicationLink && (
+                {(isNewLead || lead.sourceApplicationLink) && (
                   <tr>
                     <td>Application URL</td>
                     <td>
-                      <a href={lead.sourceApplicationLink} target="_blank" rel="noopener noreferrer">
-                        Apply Here →
-                      </a>
+                      {isNewLead ? (
+                        <input
+                          type="text"
+                          value={lead.sourceApplicationLink || ''}
+                          onChange={(e) => setLead({...lead, sourceApplicationLink: e.target.value})}
+                          placeholder="https://..."
+                        />
+                      ) : (
+                        <a href={lead.sourceApplicationLink} target="_blank" rel="noopener noreferrer">
+                          Apply Here →
+                        </a>
+                      )}
                     </td>
                   </tr>
                 )}
-                {lead.sourceLink && (
+                {(isNewLead || lead.sourceLink) && (
                   <tr>
                     <td>Source URL</td>
                     <td>
-                      <a href={lead.sourceLink} target="_blank" rel="noopener noreferrer">
-                        View Source →
-                      </a>
+                      {isNewLead ? (
+                        <input
+                          type="text"
+                          value={lead.sourceLink || ''}
+                          onChange={(e) => setLead({...lead, sourceLink: e.target.value})}
+                          placeholder="https://..."
+                        />
+                      ) : (
+                        <a href={lead.sourceLink} target="_blank" rel="noopener noreferrer">
+                          View Source →
+                        </a>
+                      )}
                     </td>
                   </tr>
                 )}
                 <tr>
                   <td>Stage</td>
                   <td>
-                    <select value={status || ''} onChange={handleStatusChange} disabled={!userLead}>
-                      {!status && <option value="">Not saved yet</option>}
+                    <select value={status || ''} onChange={handleStatusChange} disabled={!userLead && !isNewLead}>
+                      {!status && !isNewLead && <option value="">Not saved yet</option>}
                       <option value="saved">Saved</option>
                       <option value="applied">Applied</option>
                       <option value="interviewing">Interviewing</option>
@@ -261,34 +372,36 @@ const LeadDetail = () => {
                     </select>
                   </td>
                 </tr>
-                <tr>
-                  <td></td>
-                  <td>
-                    {userLead ? (
-                      <button className="btn btn-primary saved-lead-btn" disabled>
-                        Saved
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-primary save-lead-btn"
-                        onClick={async () => {
-                          try {
-                            await api.userLeads.save({
-                              leadId: lead._id,
-                              priority,
-                              notes
-                            });
-                            await fetchLeadDetails();
-                          } catch (err) {
-                            alert(`Error saving lead: ${err.message}`);
-                          }
-                        }}
-                      >
-                        Save Lead
-                      </button>
-                    )}
-                  </td>
-                </tr>
+                {!isNewLead && (
+                  <tr>
+                    <td></td>
+                    <td>
+                      {userLead ? (
+                        <button className="btn btn-primary saved-lead-btn" disabled>
+                          Saved
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn-primary save-lead-btn"
+                          onClick={async () => {
+                            try {
+                              await api.userLeads.save({
+                                leadId: lead._id,
+                                priority,
+                                notes
+                              });
+                              await fetchLeadDetails();
+                            } catch (err) {
+                              alert(`Error saving lead: ${err.message}`);
+                            }
+                          }}
+                        >
+                          Save Lead
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -299,25 +412,48 @@ const LeadDetail = () => {
               <tbody>
                 <tr>
                   <td>Contact Name</td>
-                  <td><input type="text" value={lead.contactName || 'N/A'} readOnly /></td>
+                  <td>
+                    <input
+                      type="text"
+                      value={lead.contactName || ''}
+                      onChange={(e) => setLead({...lead, contactName: e.target.value})}
+                      readOnly={!isNewLead}
+                      placeholder={isNewLead ? "e.g. Jane Doe" : ""}
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <td>Email</td>
                   <td>
-                    {lead.contactEmail ? (
+                    {!isNewLead && lead.contactEmail ? (
                       <a href={`mailto:${lead.contactEmail}`}>{lead.contactEmail}</a>
                     ) : (
-                      <input type="text" value="N/A" readOnly />
+                      <input
+                        type="email"
+                        value={lead.contactEmail || ''}
+                        onChange={(e) => setLead({...lead, contactEmail: e.target.value})}
+                        readOnly={!isNewLead}
+                        placeholder={isNewLead ? "email@example.com" : ""}
+                      />
                     )}
                   </td>
                 </tr>
-                {lead.contactLinkedIn && (
+                {(isNewLead || lead.contactLinkedIn) && (
                   <tr>
                     <td>LinkedIn</td>
                     <td>
-                      <a href={lead.contactLinkedIn} target="_blank" rel="noopener noreferrer">
-                        View Profile →
-                      </a>
+                      {isNewLead ? (
+                        <input
+                          type="text"
+                          value={lead.contactLinkedIn || ''}
+                          onChange={(e) => setLead({...lead, contactLinkedIn: e.target.value})}
+                          placeholder="https://linkedin.com/in/..."
+                        />
+                      ) : (
+                        <a href={lead.contactLinkedIn} target="_blank" rel="noopener noreferrer">
+                          View Profile →
+                        </a>
+                      )}
                     </td>
                   </tr>
                 )}
@@ -338,7 +474,7 @@ const LeadDetail = () => {
 
           <div className="actions">
             <button className="btn btn-primary" onClick={handleSave}>
-              {userLead ? 'Save Changes' : 'Save Lead to Pipeline'}
+              {isNewLead ? 'Create Lead' : userLead ? 'Save Changes' : 'Save Lead to Pipeline'}
             </button>
             <button className="btn btn-danger" onClick={handleDelete}>
               {userLead ? 'Remove from Pipeline' : 'Back'}

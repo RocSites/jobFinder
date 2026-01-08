@@ -226,3 +226,32 @@ body {
     text-align: center;
     font-style: italic;
 }
+
+/* Priority badge */
+.priority-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    font-size: 7pt;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.priority-high {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.priority-medium {
+    background: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ffcc80;
+}
+
+.priority-low {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}

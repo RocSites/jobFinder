@@ -87,6 +87,11 @@ const Pipeline = () => {
     );
   }
 
+  // Check if any leads have a priority set
+  const hasPriorities = pipeline.some(stage =>
+    stage.leads?.some(({ userLead }) => userLead.priority)
+  );
+
   return (
     <div className="main">
       <div className="page-title">Pipeline</div>
@@ -110,8 +115,8 @@ const Pipeline = () => {
               </div>
               
               {leads.map(({ userLead, leadDetails }) => (
-                <div 
-                  key={userLead._id} 
+                <div
+                  key={userLead._id}
                   className="job-card"
                   onClick={() => window.location.href = `/leads/${leadDetails._id}`}
                 >
@@ -122,12 +127,17 @@ const Pipeline = () => {
                     </Link>
                   </div>
                   <div className="job-meta">
-                    {leadDetails.location} | 
+                    {leadDetails.location} |
                     <span className="job-comp">
                       {leadDetails.compensation?.raw || 'N/A'}
                     </span>
+                    {hasPriorities && userLead.priority && (
+                      <span className={`priority-badge priority-${userLead.priority}`}>
+                        {userLead.priority}
+                      </span>
+                    )}
                   </div>
-                  
+
                   {/* Status change buttons */}
                   <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                     {column.id === 'saved' && (

@@ -86,7 +86,7 @@ export const getUserLeadById = async (req, res) => {
 export const saveLead = async (req, res) => {
   try {
     const userId = req.body.userId || process.env.DEFAULT_USER_ID;
-    const { leadId, priority = 'medium', notes } = req.body;
+    const { leadId, priority, notes } = req.body;
     
     // Check if lead exists
     const lead = await Lead.findById(leadId);
@@ -95,18 +95,28 @@ export const saveLead = async (req, res) => {
     }
     
     // Create user lead
-    const userLead = await UserLead.create({
+    const userLeadData = {
       userId,
       leadId,
-      priority,
-      notes,
       currentStatus: 'saved',
       statusHistory: [{
         status: 'saved',
         timestamp: new Date(),
         note: 'Lead saved to pipeline'
       }]
-    });
+    };
+
+    // Only add priority if provided
+    if (priority) {
+      userLeadData.priority = priority;
+    }
+
+    // Only add notes if provided
+    if (notes) {
+      userLeadData.notes = notes;
+    }
+
+    const userLead = await UserLead.create(userLeadData);
     
     // Log activity
     await Activity.create({

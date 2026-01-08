@@ -134,13 +134,17 @@
  .form-table input,
  .form-table select,
  .form-table textarea {
-     width: 100%;
+     width: 50%;
      padding: 4px;
      font-family: Verdana, Geneva, sans-serif;
      font-size: 9pt;
      border: 1px solid #e6e6df;
      background: #ffffff;
  }
+
+ .form-table input[type="date"] {
+    width: 112px;
+ } 
 
  .form-table textarea {
      min-height: 60px;
