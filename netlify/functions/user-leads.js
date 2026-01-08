@@ -24,7 +24,9 @@ export const handler = async (event) => {
     if (event.httpMethod === 'GET') {
       // /user-leads/by-lead
       if (leadId) {
-        const userLead = await collection.findOne({ leadId, userId });
+        const query = { leadId: new ObjectId(leadId) };
+        if (userId) query.userId = userId;
+        const userLead = await collection.findOne(query);
         return { statusCode: 200, body: JSON.stringify(userLead) };
       }
 
