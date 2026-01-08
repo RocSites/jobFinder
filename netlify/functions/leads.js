@@ -1,3 +1,4 @@
+// netlify/functions/leads.js
 import { MongoClient, ObjectId } from 'mongodb';
 
 let cachedClient;

@@ -1,6 +1,3 @@
-// API client for JobFinder backend
-// Place this in: src/api/client.js
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Helper function for API calls

@@ -1,3 +1,4 @@
+// netlify/functions/user-leads.js
 import { MongoClient, ObjectId } from 'mongodb';
 
 let cachedClient;
@@ -17,24 +18,49 @@ export const handler = async (event) => {
   const collection = db.collection('userLeads');
 
   try {
-    if (event.httpMethod === 'GET') {
-      const { id, userId } = event.queryStringParameters || {};
+    const { id, userId } = event.queryStringParameters || {};
 
+    // GET requests
+    if (event.httpMethod === 'GET') {
+      // /user-leads/by-lead/:leadId
+      if (event.path.includes('/by-lead/')) {
+        const leadId = event.path.split('/by-lead/')[1];
+        const userLead = await collection.findOne({ leadId, userId });
+        return { statusCode: 200, body: JSON.stringify(userLead) };
+      }
+
+      // /user-leads/:id/activity
+      if (event.path.endsWith('/activity')) {
+        const userLeadId = id;
+        const lead = await collection.findOne({ _id: new ObjectId(userLeadId) });
+        return { statusCode: 200, body: JSON.stringify(lead?.activity || []) };
+      }
+
+      // Single or all
       if (id) {
         const lead = await collection.findOne({ _id: new ObjectId(id) });
         return { statusCode: 200, body: JSON.stringify(lead) };
       }
 
-      return { statusCode: 200, body: JSON.stringify(await collection.find({ userId }).toArray()) };
+      const leads = await collection.find(userId ? { userId } : {}).toArray();
+      return { statusCode: 200, body: JSON.stringify(leads) };
     }
 
+    // POST requests
+    if (event.httpMethod === 'POST') {
+      const data = JSON.parse(event.body);
+      const result = await collection.insertOne(data);
+      return { statusCode: 201, body: JSON.stringify(result.ops[0]) };
+    }
+
+    // PUT requests
     if (event.httpMethod === 'PUT') {
-      const { id } = event.queryStringParameters || {};
+      if (!id) return { statusCode: 400, body: 'Missing ID' };
       const data = JSON.parse(event.body);
 
       // status update
-      if (data.status) {
-        await collection.updateOne({ _id: new ObjectId(id) }, { $set: { status: data.status } });
+      if (event.path.endsWith('/status') && data.status) {
+        await collection.updateOne({ _id: new ObjectId(id) }, { $set: { status: data.status, note: data.note || '' } });
       } else {
         await collection.updateOne({ _id: new ObjectId(id) }, { $set: data });
       }
@@ -43,14 +69,9 @@ export const handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify(updated) };
     }
 
-    if (event.httpMethod === 'POST') {
-      const body = JSON.parse(event.body);
-      const result = await collection.insertOne(body);
-      return { statusCode: 201, body: JSON.stringify(result.ops[0]) };
-    }
-
+    // DELETE requests
     if (event.httpMethod === 'DELETE') {
-      const { id } = event.queryStringParameters || {};
+      if (!id) return { statusCode: 400, body: 'Missing ID' };
       await collection.deleteOne({ _id: new ObjectId(id) });
       return { statusCode: 204, body: '' };
     }

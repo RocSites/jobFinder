@@ -1,3 +1,4 @@
+// netlify/functions/pipeline.js
 import { MongoClient } from 'mongodb';
 
 let cachedClient;
@@ -15,6 +16,7 @@ const connectDB = async () => {
 export const handler = async () => {
   try {
     const db = await connectDB();
+
     const pipeline = await db.collection('userLeads').aggregate([
       {
         $group: {
