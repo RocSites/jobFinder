@@ -18,8 +18,10 @@ export const handler = async (event) => {
   const collection = db.collection('leads');
 
   try {
+    const { id } = event.queryStringParameters || {};
+
+    // GET
     if (event.httpMethod === 'GET') {
-      const { id } = event.queryStringParameters || {};
       if (id) {
         const lead = await collection.findOne({ _id: new ObjectId(id) });
         return { statusCode: 200, body: JSON.stringify(lead) };
@@ -28,28 +30,31 @@ export const handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify(allLeads) };
     }
 
+    // POST
     if (event.httpMethod === 'POST') {
       const data = JSON.parse(event.body);
       const result = await collection.insertOne(data);
       return { statusCode: 201, body: JSON.stringify(result.ops[0]) };
     }
 
+    // PUT
     if (event.httpMethod === 'PUT') {
-      const { id } = event.queryStringParameters || {};
+      if (!id) return { statusCode: 400, body: 'Missing ID' };
       const updates = JSON.parse(event.body);
       await collection.updateOne({ _id: new ObjectId(id) }, { $set: updates });
       const updated = await collection.findOne({ _id: new ObjectId(id) });
       return { statusCode: 200, body: JSON.stringify(updated) };
     }
 
+    // DELETE
     if (event.httpMethod === 'DELETE') {
-      const { id } = event.queryStringParameters || {};
+      if (!id) return { statusCode: 400, body: 'Missing ID' };
       await collection.deleteOne({ _id: new ObjectId(id) });
       return { statusCode: 204, body: '' };
     }
 
     return { statusCode: 405, body: 'Method Not Allowed' };
-  } catch (error) {
-    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+  } catch (err) {
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };

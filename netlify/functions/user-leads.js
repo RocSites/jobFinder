@@ -18,49 +18,52 @@ export const handler = async (event) => {
   const collection = db.collection('userLeads');
 
   try {
-    const { id, userId } = event.queryStringParameters || {};
+    const { id, userId, leadId, activity } = event.queryStringParameters || {};
 
     // GET requests
     if (event.httpMethod === 'GET') {
-      // /user-leads/by-lead/:leadId
-      if (event.path.includes('/by-lead/')) {
-        const leadId = event.path.split('/by-lead/')[1];
+      // /user-leads/by-lead
+      if (leadId) {
         const userLead = await collection.findOne({ leadId, userId });
         return { statusCode: 200, body: JSON.stringify(userLead) };
       }
 
       // /user-leads/:id/activity
-      if (event.path.endsWith('/activity')) {
-        const userLeadId = id;
-        const lead = await collection.findOne({ _id: new ObjectId(userLeadId) });
+      if (activity === 'true' && id) {
+        const lead = await collection.findOne({ _id: new ObjectId(id) });
         return { statusCode: 200, body: JSON.stringify(lead?.activity || []) };
       }
 
-      // Single or all
+      // single user-lead
       if (id) {
         const lead = await collection.findOne({ _id: new ObjectId(id) });
         return { statusCode: 200, body: JSON.stringify(lead) };
       }
 
-      const leads = await collection.find(userId ? { userId } : {}).toArray();
+      // all leads
+      const query = userId ? { userId } : {};
+      const leads = await collection.find(query).toArray();
       return { statusCode: 200, body: JSON.stringify(leads) };
     }
 
-    // POST requests
+    // POST
     if (event.httpMethod === 'POST') {
       const data = JSON.parse(event.body);
       const result = await collection.insertOne(data);
       return { statusCode: 201, body: JSON.stringify(result.ops[0]) };
     }
 
-    // PUT requests
+    // PUT
     if (event.httpMethod === 'PUT') {
       if (!id) return { statusCode: 400, body: 'Missing ID' };
       const data = JSON.parse(event.body);
 
       // status update
-      if (event.path.endsWith('/status') && data.status) {
-        await collection.updateOne({ _id: new ObjectId(id) }, { $set: { status: data.status, note: data.note || '' } });
+      if (data.status) {
+        await collection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { status: data.status, note: data.note || '' } }
+        );
       } else {
         await collection.updateOne({ _id: new ObjectId(id) }, { $set: data });
       }
@@ -69,7 +72,7 @@ export const handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify(updated) };
     }
 
-    // DELETE requests
+    // DELETE
     if (event.httpMethod === 'DELETE') {
       if (!id) return { statusCode: 400, body: 'Missing ID' };
       await collection.deleteOne({ _id: new ObjectId(id) });
