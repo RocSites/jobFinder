@@ -4,7 +4,7 @@ import Activity from '../models/Activity.js';
 
 // Valid status transitions (allows moving forward and backward between stages)
 const STATUS_FLOW = {
-  saved: ['applied', 'rejected', 'archived'],
+  saved: ['applied', 'interviewing', 'rejected', 'archived'],
   applied: ['saved', 'interviewing', 'rejected', 'archived'],
   interviewing: ['saved', 'applied', 'offer', 'rejected', 'archived'],
   offer: ['saved', 'applied', 'interviewing', 'rejected', 'archived'],

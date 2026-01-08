@@ -113,6 +113,39 @@
      margin-bottom: 8px;
      padding-bottom: 4px;
      border-bottom: 1px solid #e6e6df;
+     display: flex;
+     align-items: center;
+ }
+
+ .edit-banner {
+     font-size: 8pt;
+     color: #ff6600;
+     font-weight: normal;
+     text-transform: none;
+     font-style: italic;
+     margin-left: 16px;
+ }
+
+ .edit-icon-btn {
+     background: none;
+     border: none;
+     cursor: pointer;
+     padding: 4px 8px;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     color: #828282;
+     transition: color 0.2s ease;
+     font-family: Verdana, Geneva, sans-serif;
+     margin-left: 16px;
+ }
+
+ .edit-icon-btn:hover {
+     color: #ff6600;
+ }
+
+ .edit-icon-btn:active {
+     transform: scale(0.95);
  }
 
  .form-table {
@@ -186,6 +219,17 @@
 
  .btn-primary:hover {
      background: #cc5200;
+ }
+
+ .btn-saved {
+     background: #00a000 !important;
+     color: #ffffff !important;
+     border-color: #00a000 !important;
+     cursor: default !important;
+ }
+
+ .btn-saved:hover {
+     background: #00a000 !important;
  }
 
  .btn-danger {

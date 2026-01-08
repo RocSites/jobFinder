@@ -237,12 +237,24 @@ const Leads = () => {
     .sort((a, b) => {
       const aIsSaved = savedLeads.has(a._id);
       const bIsSaved = savedLeads.has(b._id);
+      const aUserLead = userLeadsMap.get(a._id);
+      const bUserLead = userLeadsMap.get(b._id);
+
+      // Priority ranking: high = 3, medium = 2, low = 1, none = 0
+      const priorityValue = { high: 3, medium: 2, low: 1 };
+      const aPriority = aUserLead?.priority ? priorityValue[aUserLead.priority] : 0;
+      const bPriority = bUserLead?.priority ? priorityValue[bUserLead.priority] : 0;
+
+      // If both are saved and have priorities, sort by priority
+      if (aIsSaved && bIsSaved && aPriority > 0 && bPriority > 0) {
+        return bPriority - aPriority; // Higher priority first
+      }
 
       // If one is saved and the other isn't, saved comes first
       if (aIsSaved && !bIsSaved) return -1;
       if (!aIsSaved && bIsSaved) return 1;
 
-      // If both have same saved status, sort by date posted (newest first)
+      // For saved leads without priority or non-saved leads, sort by date posted (newest first)
       const aDate = a.datePosted ? new Date(a.datePosted) : new Date(0);
       const bDate = b.datePosted ? new Date(b.datePosted) : new Date(0);
       return bDate - aDate;
@@ -279,7 +291,7 @@ const Leads = () => {
         </div>
 
         <div className="actions">
-          <button onClick={fetchLeads}>Refresh leads</button>
+          <button className="btn" onClick={fetchLeads}>Refresh leads</button>
           <Link to="/leads/new" className="btn-add-lead">Add Lead</Link>
         </div>
 
@@ -463,7 +475,11 @@ const Leads = () => {
                 {paginatedLeads.map((lead) => {
                   const userLead = userLeadsMap.get(lead._id);
                   return (
-                    <tr key={lead._id}>
+                    <tr
+                      key={lead._id}
+                      onClick={() => window.location.href = `/leads/${lead._id}`}
+                      style={{ cursor: 'pointer' }}
+                    >
                       {hasPriorities && (
                         <td>
                           {userLead?.priority ? (
@@ -495,8 +511,37 @@ const Leads = () => {
                         {lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A'}
                       </td>
                       <td>{lead.contactName || 'N/A'}</td>
-                      <td>{lead.contactEmail || 'N/A'}</td>
                       <td>
+                        {lead.contactEmail ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>{lead.contactEmail}</span>
+                            <button
+                              className="copy-icon-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(lead.contactEmail);
+                                const button = e.currentTarget;
+                                const originalHTML = button.innerHTML;
+                                button.innerHTML = '<span style="font-size: 8pt; color: #00a000; white-space: nowrap;">Copied!</span>';
+                                button.style.padding = '4px 6px';
+                                setTimeout(() => {
+                                  button.innerHTML = originalHTML;
+                                  button.style.padding = '4px';
+                                }, 1500);
+                              }}
+                              title="Copy email"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            </button>
+                          </div>
+                        ) : (
+                          'N/A'
+                        )}
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
                         {savedLeads.has(lead._id) ? (
                           <button className="action-btn saved" disabled>
                             Saved

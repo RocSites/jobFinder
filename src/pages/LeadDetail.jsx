@@ -23,6 +23,13 @@ const LeadDetail = () => {
   const [notes, setNotes] = useState('');
   const [newNote, setNewNote] = useState('');
 
+  // Edit mode state
+  const [isEditingBasic, setIsEditingBasic] = useState(false);
+  const [isEditingContact, setIsEditingContact] = useState(false);
+
+  // Save button state
+  const [showSavedConfirmation, setShowSavedConfirmation] = useState(false);
+
   useEffect(() => {
     if (isNewLead) {
       // Initialize empty lead for new entry
@@ -50,11 +57,11 @@ const LeadDetail = () => {
   const fetchLeadDetails = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch lead details
       const leadData = await api.leads.getById(leadId);
       setLead(leadData);
-      
+
       // Try to fetch user lead using the new by-lead endpoint
       try {
         const userLeadData = await api.userLeads.getByLeadId(leadId);
@@ -62,7 +69,7 @@ const LeadDetail = () => {
         setPriority(userLeadData.priority);
         setStatus(userLeadData.currentStatus); // ✅ This now gets the correct status!
         setNotes(userLeadData.notes || '');
-        
+
         // Fetch activity using the ACTUAL userLead ID
         const activityData = await api.userLeads.getActivity(userLeadData._id);
         setActivity(activityData);
@@ -115,9 +122,38 @@ const LeadDetail = () => {
         alert('Lead created and saved to pipeline!');
         navigate(`/leads/${createdLead._id}`);
       } else if (userLead) {
-        // Update existing
+        // Update existing userLead
         await api.userLeads.update(userLead._id, { priority, notes });
-        alert('Changes saved!');
+
+        // If in edit mode, also update the lead itself
+        if (isEditingBasic || isEditingContact) {
+          const updatedLeadData = {
+            title: lead.title,
+            company: lead.company,
+            location: lead.location,
+            team: lead.team,
+            compensation: { raw: lead.compensation?.raw || '' },
+            industry: lead.industry,
+            datePosted: lead.datePosted,
+            contactName: lead.contactName,
+            contactEmail: lead.contactEmail,
+            contactLinkedIn: lead.contactLinkedIn,
+            sourceApplicationLink: lead.sourceApplicationLink,
+            sourceLink: lead.sourceLink
+          };
+          await api.leads.update(lead._id, updatedLeadData);
+          setIsEditingBasic(false);
+          setIsEditingContact(false);
+        }
+
+        // Show "Saved" confirmation
+        setShowSavedConfirmation(true);
+
+        // Reset back to "Save Changes" after 1.5 seconds
+        setTimeout(() => {
+          setShowSavedConfirmation(false);
+        }, 1500);
+
         fetchLeadDetails(); // Refresh to get latest data
       } else {
         // Create new userLead for existing lead
@@ -162,11 +198,11 @@ const LeadDetail = () => {
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
-    
+
     const updatedNotes = notes ? `${notes}\n\n[${new Date().toLocaleDateString()}] ${newNote}` : `[${new Date().toLocaleDateString()}] ${newNote}`;
     setNotes(updatedNotes);
     setNewNote('');
-    
+
     if (userLead) {
       try {
         await api.userLeads.update(userLead._id, { notes: updatedNotes });
@@ -182,7 +218,7 @@ const LeadDetail = () => {
       navigate('/leads');
       return;
     }
-    
+
     if (window.confirm('Remove this lead from your pipeline?')) {
       try {
         await api.userLeads.remove(userLead._id);
@@ -223,30 +259,52 @@ const LeadDetail = () => {
       <div className="content-grid">
         <div className="main-col">
           <div className="section">
-            <div className="section-title">Basic Information</div>
+            <div className="section-title">
+              Basic Information
+              {!isNewLead && !userLead && (
+                <span className="edit-banner">Please save this lead first to enable editing</span>
+              )}
+              {!isNewLead && userLead && (
+                <button
+                  className="edit-icon-btn"
+                  onClick={() => setIsEditingBasic(!isEditingBasic)}
+                  title={isEditingBasic ? "Cancel editing" : "Edit basic information"}
+                >
+                  {isEditingBasic ? (
+                    <span style={{ fontSize: '9pt' }}>Cancel</span>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  )}
+                </button>
+              )}
+            </div>
             <table className="form-table">
               <tbody>
-                <tr>
-                  <td>Position</td>
-                  <td>
-                    <input
-                      type="text"
-                      value={lead.title}
-                      onChange={(e) => setLead({...lead, title: e.target.value})}
-                      readOnly={!isNewLead}
-                      placeholder={isNewLead ? "e.g. Senior Software Engineer" : ""}
-                    />
-                  </td>
-                </tr>
+
                 <tr>
                   <td>Company</td>
                   <td>
                     <input
                       type="text"
                       value={lead.company}
-                      onChange={(e) => setLead({...lead, company: e.target.value})}
-                      readOnly={!isNewLead}
+                      onChange={(e) => setLead({ ...lead, company: e.target.value })}
+                      readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. Acme Corp" : ""}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Position</td>
+                  <td>
+                    <input
+                      type="text"
+                      value={lead.title}
+                      onChange={(e) => setLead({ ...lead, title: e.target.value })}
+                      readOnly={!isNewLead && !isEditingBasic}
+                      placeholder={isNewLead ? "e.g. Senior Software Engineer" : ""}
                     />
                   </td>
                 </tr>
@@ -256,8 +314,8 @@ const LeadDetail = () => {
                     <input
                       type="text"
                       value={lead.location || ''}
-                      onChange={(e) => setLead({...lead, location: e.target.value})}
-                      readOnly={!isNewLead}
+                      onChange={(e) => setLead({ ...lead, location: e.target.value })}
+                      readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. San Francisco, CA or Remote" : ""}
                     />
                   </td>
@@ -268,8 +326,8 @@ const LeadDetail = () => {
                     <input
                       type="text"
                       value={lead.team || ''}
-                      onChange={(e) => setLead({...lead, team: e.target.value})}
-                      readOnly={!isNewLead}
+                      onChange={(e) => setLead({ ...lead, team: e.target.value })}
+                      readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. Engineering" : ""}
                     />
                   </td>
@@ -280,9 +338,9 @@ const LeadDetail = () => {
                     <input
                       type="text"
                       value={lead.compensation?.raw || ''}
-                      onChange={(e) => setLead({...lead, compensation: {raw: e.target.value}})}
+                      onChange={(e) => setLead({ ...lead, compensation: { raw: e.target.value } })}
                       className="comp-value"
-                      readOnly={!isNewLead}
+                      readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. $120k - $180k" : ""}
                     />
                   </td>
@@ -303,8 +361,8 @@ const LeadDetail = () => {
                     <input
                       type="text"
                       value={lead.industry || ''}
-                      onChange={(e) => setLead({...lead, industry: e.target.value})}
-                      readOnly={!isNewLead}
+                      onChange={(e) => setLead({ ...lead, industry: e.target.value })}
+                      readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. Technology, Finance" : ""}
                     />
                   </td>
@@ -313,22 +371,22 @@ const LeadDetail = () => {
                   <td>Date Posted</td>
                   <td>
                     <input
-                      type={isNewLead ? "date" : "text"}
-                      value={isNewLead ? (lead.datePosted || '') : (lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A')}
-                      onChange={(e) => setLead({...lead, datePosted: e.target.value})}
-                      readOnly={!isNewLead}
+                      type={(isNewLead || isEditingBasic) ? "date" : "text"}
+                      value={(isNewLead || isEditingBasic) ? (lead.datePosted || '') : (lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A')}
+                      onChange={(e) => setLead({ ...lead, datePosted: e.target.value })}
+                      readOnly={!isNewLead && !isEditingBasic}
                     />
                   </td>
                 </tr>
-                {(isNewLead || lead.sourceApplicationLink) && (
+                {(isNewLead || isEditingBasic || lead.sourceApplicationLink) && (
                   <tr>
                     <td>Application URL</td>
                     <td>
-                      {isNewLead ? (
+                      {(isNewLead || isEditingBasic) ? (
                         <input
                           type="text"
                           value={lead.sourceApplicationLink || ''}
-                          onChange={(e) => setLead({...lead, sourceApplicationLink: e.target.value})}
+                          onChange={(e) => setLead({ ...lead, sourceApplicationLink: e.target.value })}
                           placeholder="https://..."
                         />
                       ) : (
@@ -339,15 +397,15 @@ const LeadDetail = () => {
                     </td>
                   </tr>
                 )}
-                {(isNewLead || lead.sourceLink) && (
+                {(isNewLead || isEditingBasic || lead.sourceLink) && (
                   <tr>
                     <td>Source URL</td>
                     <td>
-                      {isNewLead ? (
+                      {(isNewLead || isEditingBasic) ? (
                         <input
                           type="text"
                           value={lead.sourceLink || ''}
-                          onChange={(e) => setLead({...lead, sourceLink: e.target.value})}
+                          onChange={(e) => setLead({ ...lead, sourceLink: e.target.value })}
                           placeholder="https://..."
                         />
                       ) : (
@@ -378,7 +436,7 @@ const LeadDetail = () => {
                     <td>
                       {userLead ? (
                         <button className="btn btn-primary saved-lead-btn" disabled>
-                          Saved
+                          Lead Saved
                         </button>
                       ) : (
                         <button
@@ -407,7 +465,28 @@ const LeadDetail = () => {
           </div>
 
           <div className="section">
-            <div className="section-title">Contact Information</div>
+            <div className="section-title">
+              Contact Information
+              {!isNewLead && !userLead && (
+                <span className="edit-banner">Please save this lead first to enable editing</span>
+              )}
+              {!isNewLead && userLead && (
+                <button
+                  className="edit-icon-btn"
+                  onClick={() => setIsEditingContact(!isEditingContact)}
+                  title={isEditingContact ? "Cancel editing" : "Edit contact information"}
+                >
+                  {isEditingContact ? (
+                    <span style={{ fontSize: '9pt' }}>Cancel</span>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  )}
+                </button>
+              )}
+            </div>
             <table className="form-table">
               <tbody>
                 <tr>
@@ -416,8 +495,8 @@ const LeadDetail = () => {
                     <input
                       type="text"
                       value={lead.contactName || ''}
-                      onChange={(e) => setLead({...lead, contactName: e.target.value})}
-                      readOnly={!isNewLead}
+                      onChange={(e) => setLead({ ...lead, contactName: e.target.value })}
+                      readOnly={!isNewLead && !isEditingContact}
                       placeholder={isNewLead ? "e.g. Jane Doe" : ""}
                     />
                   </td>
@@ -425,28 +504,28 @@ const LeadDetail = () => {
                 <tr>
                   <td>Email</td>
                   <td>
-                    {!isNewLead && lead.contactEmail ? (
+                    {!isNewLead && !isEditingContact && lead.contactEmail ? (
                       <a href={`mailto:${lead.contactEmail}`}>{lead.contactEmail}</a>
                     ) : (
                       <input
                         type="email"
                         value={lead.contactEmail || ''}
-                        onChange={(e) => setLead({...lead, contactEmail: e.target.value})}
-                        readOnly={!isNewLead}
+                        onChange={(e) => setLead({ ...lead, contactEmail: e.target.value })}
+                        readOnly={!isNewLead && !isEditingContact}
                         placeholder={isNewLead ? "email@example.com" : ""}
                       />
                     )}
                   </td>
                 </tr>
-                {(isNewLead || lead.contactLinkedIn) && (
+                {(isNewLead || isEditingContact || lead.contactLinkedIn) && (
                   <tr>
                     <td>LinkedIn</td>
                     <td>
-                      {isNewLead ? (
+                      {(isNewLead || isEditingContact) ? (
                         <input
                           type="text"
                           value={lead.contactLinkedIn || ''}
-                          onChange={(e) => setLead({...lead, contactLinkedIn: e.target.value})}
+                          onChange={(e) => setLead({ ...lead, contactLinkedIn: e.target.value })}
                           placeholder="https://linkedin.com/in/..."
                         />
                       ) : (
@@ -460,8 +539,8 @@ const LeadDetail = () => {
                 <tr>
                   <td>Notes</td>
                   <td>
-                    <textarea 
-                      value={notes} 
+                    <textarea
+                      value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows="6"
                       placeholder="Add your notes about this opportunity..."
@@ -473,8 +552,12 @@ const LeadDetail = () => {
           </div>
 
           <div className="actions">
-            <button className="btn btn-primary" onClick={handleSave}>
-              {isNewLead ? 'Create Lead' : userLead ? 'Save Changes' : 'Save Lead to Pipeline'}
+            <button
+              className={`btn ${showSavedConfirmation ? 'btn-saved' : 'btn-primary'}`}
+              onClick={handleSave}
+              disabled={showSavedConfirmation}
+            >
+              {showSavedConfirmation ? 'Saved' : (isNewLead ? 'Create Lead' : userLead ? 'Save Changes' : 'Save Lead to Pipeline')}
             </button>
             <button className="btn btn-danger" onClick={handleDelete}>
               {userLead ? 'Remove from Pipeline' : 'Back'}
@@ -512,7 +595,7 @@ const LeadDetail = () => {
             )}
 
             <div className="add-note">
-              <textarea 
+              <textarea
                 placeholder="Add a quick note..."
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}

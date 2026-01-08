@@ -425,6 +425,28 @@
     margin: 0 8px;
 }
 
+/* Copy icon button */
+.copy-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #828282;
+    transition: color 0.2s ease;
+    line-height: 0;
+}
+
+.copy-icon-btn:hover {
+    color: #ff6600;
+}
+
+.copy-icon-btn:active {
+    transform: scale(0.95);
+}
+
 /* Priority badge */
 .priority-badge {
     display: inline-block;

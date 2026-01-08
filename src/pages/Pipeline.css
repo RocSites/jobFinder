@@ -91,6 +91,7 @@ body {
     display: table;
     width: 100%;
     border-spacing: 4px;
+    margin-top: 10px;
 }
 
 .pipeline-col {
@@ -132,8 +133,9 @@ body {
 }
 
 .job-company {
-    font-size: 8pt;
+    font-size: 10pt;
     color: #828282;
+    font-weight: bold;
 }
 
 .job-title {
@@ -191,6 +193,18 @@ body {
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
+}
+
+.btn-add-lead-pipeline {
+    background: #ff6600;
+    color: #ffffff !important;
+    padding: 4px 8px;
+    margin-left: 4px;
+    font-size: 10pt;
+    text-decoration: none;
+    border: 1px solid #ff6600;
+    cursor: pointer;
+    font-family: Verdana, Geneva, sans-serif;
 }
 
 .btn-sm {

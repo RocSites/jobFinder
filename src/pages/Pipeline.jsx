@@ -28,7 +28,7 @@ const Pipeline = () => {
       setLoading(true);
       const data = await api.userLeads.getPipeline();
       setPipeline(data);
-      
+
       // Calculate stats from pipeline data
       const stats = {
         activeLeads: data.reduce((sum, stage) => sum + stage.count, 0),
@@ -102,6 +102,7 @@ const Pipeline = () => {
         <span>{stats.interviewing} interviews</span>
         <span>{stats.offers} offer{stats.offers !== 1 ? 's' : ''}</span>
       </div>
+      <Link to="/leads/new" className="btn-add-lead-pipeline">Add Lead</Link>
 
       <div className="pipeline-table">
         {statusColumns.map(column => {
@@ -113,7 +114,7 @@ const Pipeline = () => {
               <div className="col-header">
                 {column.title} <span className="count">{count}</span>
               </div>
-              
+
               {leads.map(({ userLead, leadDetails }) => (
                 <div
                   key={userLead._id}
@@ -194,7 +195,7 @@ const Pipeline = () => {
                   </div>
                 </div>
               ))}
-              
+
               {count === 0 && (
                 <div className="empty-state">
                   No {column.title.toLowerCase()} leads
