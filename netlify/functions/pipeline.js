@@ -16,10 +16,10 @@ const connectDB = async () => {
 export const handler = async () => {
   try {
     const db = await connectDB();
-    const pipeline = await db.collection('userLeads').aggregate([
+    const pipeline = await db.collection('userleads').aggregate([
       {
         $group: {
-          _id: '$status',
+          _id: '$currentStatus',
           count: { $sum: 1 },
           leads: { $push: '$$ROOT' }
         }

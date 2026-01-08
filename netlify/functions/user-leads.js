@@ -15,7 +15,7 @@ const connectDB = async () => {
 
 export const handler = async (event) => {
   const db = await connectDB();
-  const collection = db.collection('userLeads');
+  const collection = db.collection('userleads');
 
   try {
     const { id, userId, leadId, activity } = event.queryStringParameters || {};
