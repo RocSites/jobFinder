@@ -18,10 +18,32 @@ export const handler = async () => {
     const db = await connectDB();
     const pipeline = await db.collection('userleads').aggregate([
       {
+        // Join with leads collection to get lead details
+        $lookup: {
+          from: 'leads',
+          localField: 'leadId',
+          foreignField: '_id',
+          as: 'leadDetails'
+        }
+      },
+      {
+        // Unwind the leadDetails array (should only have 1 item)
+        $unwind: {
+          path: '$leadDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        // Group by status
         $group: {
           _id: '$currentStatus',
           count: { $sum: 1 },
-          leads: { $push: '$$ROOT' }
+          leads: {
+            $push: {
+              userLead: '$$ROOT',
+              leadDetails: '$leadDetails'
+            }
+          }
         }
       }
     ]).toArray();
