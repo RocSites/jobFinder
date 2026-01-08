@@ -92,6 +92,19 @@ const Pipeline = () => {
     stage.leads?.some(({ userLead }) => userLead.priority)
   );
 
+
+  const sortLeadsByPriority = (leads) => {
+    const priorityValue = { "high": 3, "medium": 2, "low": 1 };
+
+    return [...leads].sort((a,b) => {
+      const aPriority = priorityValue[a.userLead.priority] ?? 0;
+      const bPriority = priorityValue[b.userLead.priority] ?? 0;
+
+      return bPriority - aPriority;
+    })
+  }
+
+
   return (
     <div className="main">
       <div className="page-title">Pipeline</div>
@@ -109,13 +122,15 @@ const Pipeline = () => {
           const leads = getLeadsByStatus(column.id);
           const count = leads.length;
 
+          const sortedLeadsPriority = sortLeadsByPriority(leads)
+          
           return (
             <div key={column.id} className="pipeline-col">
               <div className="col-header">
                 {column.title} <span className="count">{count}</span>
               </div>
 
-              {leads.map(({ userLead, leadDetails }) => (
+              {sortedLeadsPriority.map(({ userLead, leadDetails }) => (
                 <div
                   key={userLead._id}
                   className="job-card"
