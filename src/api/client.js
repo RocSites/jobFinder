@@ -15,6 +15,11 @@ const fetchAPI = async (endpoint, options = {}) => {
     throw new Error(error.message || 'API request failed');
   }
 
+  // 204 No Content responses have no body
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 };
 
