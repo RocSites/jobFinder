@@ -87,12 +87,6 @@ const Pipeline = () => {
     );
   }
 
-  // Check if any leads have a priority set
-  const hasPriorities = pipeline.some(stage =>
-    stage.leads?.some(({ userLead }) => userLead.priority)
-  );
-
-
   const sortLeadsByPriority = (leads) => {
     const priorityValue = { "high": 3, "medium": 2, "low": 1 };
 
@@ -147,7 +141,7 @@ const Pipeline = () => {
                     <span className="job-comp">
                       {leadDetails.compensation?.raw || 'N/A'}
                     </span>
-                    {hasPriorities && userLead.priority && (
+                    {userLead.priority && (
                       <span className={`priority-badge priority-${userLead.priority}`}>
                         {userLead.priority}
                       </span>
