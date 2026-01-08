@@ -84,12 +84,43 @@ export const handler = async (event) => {
 
       // status update
       if (data.status) {
+        const updateDoc = {
+          currentStatus: data.status,
+          updatedAt: new Date().toISOString(),
+          lastActivityAt: new Date().toISOString()
+        };
+
+        // Add timestamp for specific status changes
+        if (data.status === 'applied' && !data.appliedAt) {
+          updateDoc.appliedAt = new Date().toISOString();
+        } else if (data.status === 'interviewing' && !data.interviewingAt) {
+          updateDoc.interviewingAt = new Date().toISOString();
+        }
+
+        // Add to status history
         await collection.updateOne(
           { _id: new ObjectId(id) },
-          { $set: { status: data.status, note: data.note || '' } }
+          {
+            $set: updateDoc,
+            $push: {
+              statusHistory: {
+                status: data.status,
+                timestamp: new Date().toISOString(),
+                note: data.note || `Status changed to ${data.status}`
+              }
+            }
+          }
         );
       } else {
-        await collection.updateOne({ _id: new ObjectId(id) }, { $set: data });
+        await collection.updateOne(
+          { _id: new ObjectId(id) },
+          {
+            $set: {
+              ...data,
+              updatedAt: new Date().toISOString()
+            }
+          }
+        );
       }
 
       const updated = await collection.findOne({ _id: new ObjectId(id) });
