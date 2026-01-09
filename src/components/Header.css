@@ -43,3 +43,18 @@
    color: #000000;
    font-size: 10pt;
  }
+
+ .dark-mode-toggle {
+   background: none;
+   border: none;
+   font-size: 18px;
+   cursor: pointer;
+   padding: 4px 8px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+ }
+
+ .dark-mode-toggle:hover {
+   opacity: 0.8;
+ }

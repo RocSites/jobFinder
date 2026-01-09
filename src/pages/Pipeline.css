@@ -269,3 +269,103 @@ body {
     color: #2e7d32;
     border: 1px solid #a5d6a7;
 }
+/* Dark Mode Styles */
+body.dark-mode .main {
+    background: #1a1a1a;
+}
+
+body.dark-mode .page-title {
+    color: #e0e0e0;
+}
+
+body.dark-mode .stats {
+    background: #2a2a2a;
+    border-color: #404040;
+    color: #999;
+}
+
+body.dark-mode .btn-add-lead-pipeline {
+    background: #ff6600;
+    color: #ffffff;
+}
+
+body.dark-mode .pipeline-table {
+    background: #1a1a1a;
+}
+
+body.dark-mode .pipeline-col {
+    border-color: #404040;
+}
+
+body.dark-mode .col-header {
+    background: #2a2a2a;
+    border-color: #404040;
+    color: #999;
+}
+
+body.dark-mode .count {
+    background: #ff6600;
+    color: #ffffff;
+}
+
+body.dark-mode .job-card {
+    background: #2a2a2a;
+    border-color: #404040;
+}
+
+body.dark-mode .job-card:hover {
+    background: #333;
+    border-color: #ff6600;
+}
+
+body.dark-mode .job-company {
+    color: #999;
+}
+
+body.dark-mode .job-title a {
+    color: #e0e0e0;
+}
+
+body.dark-mode .job-meta {
+    color: #999;
+}
+
+body.dark-mode .job-comp {
+    color: #00cc00;
+}
+
+body.dark-mode .empty-state {
+    color: #999;
+}
+
+body.dark-mode .btn-sm {
+    background: #333;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .btn-sm:hover {
+    background: #404040;
+}
+
+body.dark-mode .btn-secondary {
+    background: #2a2a2a;
+}
+
+body.dark-mode .priority-badge.priority-high {
+    background: #3a1f1f;
+    color: #ff6b6b;
+    border-color: #5a2f2f;
+}
+
+body.dark-mode .priority-badge.priority-medium {
+    background: #3a2f1f;
+    color: #ffa726;
+    border-color: #5a4f2f;
+}
+
+body.dark-mode .priority-badge.priority-low {
+    background: #1f3a1f;
+    color: #66bb6a;
+    border-color: #2f5a2f;
+}

@@ -317,3 +317,132 @@
          grid-template-columns: 1fr;
      }
  }
+/* Dark Mode Styles */
+body.dark-mode .lead-detail-container {
+    background: #1a1a1a;
+}
+
+body.dark-mode .lead-header {
+    background: #2a2a2a;
+    border-color: #404040;
+}
+
+body.dark-mode .lead-title {
+    color: #e0e0e0;
+}
+
+body.dark-mode .lead-company,
+body.dark-mode .lead-meta {
+    color: #999;
+}
+
+body.dark-mode .lead-comp {
+    color: #00cc00;
+}
+
+body.dark-mode .action-row .btn,
+body.dark-mode .action-row .btn-secondary,
+body.dark-mode .action-row .btn-danger {
+    background: #333;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .action-row .btn-primary {
+    background: #ff6600;
+    color: #ffffff;
+    border-color: #ff6600;
+}
+
+body.dark-mode .action-row .btn:hover {
+    background: #404040;
+}
+
+body.dark-mode .action-row .btn-danger:hover {
+    background: #8b0000;
+    border-color: #8b0000;
+}
+
+body.dark-mode .detail-section {
+    background: #2a2a2a;
+    border-color: #404040;
+}
+
+body.dark-mode .section-header {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .detail-field label {
+    color: #999;
+}
+
+body.dark-mode .detail-field .value,
+body.dark-mode .detail-field input,
+body.dark-mode .detail-field textarea {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .detail-field a {
+    color: #ff6600;
+}
+
+body.dark-mode select {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .status-badge {
+    background: #2a2a2a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .priority-badge.priority-high {
+    background: #3a1f1f;
+    color: #ff6b6b;
+    border-color: #5a2f2f;
+}
+
+body.dark-mode .priority-badge.priority-medium {
+    background: #3a2f1f;
+    color: #ffa726;
+    border-color: #5a4f2f;
+}
+
+body.dark-mode .priority-badge.priority-low {
+    background: #1f3a1f;
+    color: #66bb6a;
+    border-color: #2f5a2f;
+}
+
+body.dark-mode .activity-item {
+    background: #1a1a1a;
+    border-color: #404040;
+}
+
+body.dark-mode .activity-time {
+    color: #999;
+}
+
+body.dark-mode .activity-status {
+    color: #e0e0e0;
+}
+
+body.dark-mode .activity-note {
+    color: #999;
+}
+
+body.dark-mode .note-input {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .note-input::placeholder {
+    color: #666;
+}
