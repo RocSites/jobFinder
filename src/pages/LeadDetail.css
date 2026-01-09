@@ -396,6 +396,22 @@ body.dark-mode select {
     color: #e0e0e0;
 }
 
+body.dark-mode .form-table {
+    color: #e0e0e0;
+}
+
+body.dark-mode .form-table td:first-child {
+    color: #999;
+}
+
+body.dark-mode .form-table input,
+body.dark-mode .form-table select,
+body.dark-mode .form-table textarea {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
 body.dark-mode .status-badge {
     background: #2a2a2a;
     border-color: #404040;
@@ -423,6 +439,11 @@ body.dark-mode .priority-badge.priority-low {
 body.dark-mode .activity-item {
     background: #1a1a1a;
     border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .activity-meta {
+    color: #999;
 }
 
 body.dark-mode .activity-time {
@@ -437,6 +458,10 @@ body.dark-mode .activity-note {
     color: #999;
 }
 
+body.dark-mode .activity-text {
+    color: #e0e0e0;
+}
+
 body.dark-mode .note-input {
     background: #1a1a1a;
     border-color: #404040;
@@ -444,5 +469,19 @@ body.dark-mode .note-input {
 }
 
 body.dark-mode .note-input::placeholder {
+    color: #666;
+}
+
+body.dark-mode .add-note {
+    border-color: #404040;
+}
+
+body.dark-mode .add-note textarea {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .add-note textarea::placeholder {
     color: #666;
 }
