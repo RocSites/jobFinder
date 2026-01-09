@@ -479,7 +479,8 @@ body.dark-mode .main {
     background: #1a1a1a;
 }
 
-body.dark-mode .page-title {
+body.dark-mode .page-title,
+body.dark-mode .filter-group-title {
     color: #e0e0e0;
 }
 
