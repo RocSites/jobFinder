@@ -56,6 +56,7 @@
  .pipeline {
    display: flex;
    border-spacing: 0;
+   min-height: 60vh;
  }
 
  .pipeline-col {
@@ -278,4 +279,55 @@ body.dark-mode .count {
 body.dark-mode .nav a,
 body.dark-mode .user-info {
   color: #e0e0e0;
+}
+
+/* Mobile Responsive - under 600px */
+@media (max-width: 600px) {
+  .pipeline {
+    display: block;
+    min-height: auto;
+  }
+
+  .pipeline-col {
+    display: block;
+    width: 100%;
+    border-right: none;
+    margin-bottom: 12px;
+  }
+
+  .pipeline-col-header {
+    background: #ffffff;
+    border: 1px solid #e6e6df;
+    margin-bottom: 4px;
+  }
+
+  .job-item {
+    background: #ffffff;
+    border: 1px solid #e6e6df;
+    margin-bottom: 4px;
+    padding: 8px;
+  }
+
+  .job-item:hover {
+    background: #f6f6ef;
+  }
+
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Dark mode mobile adjustments */
+  body.dark-mode .pipeline-col-header {
+    background: #2a2a2a;
+    border-color: #404040;
+  }
+
+  body.dark-mode .job-item {
+    background: #2a2a2a;
+    border-color: #404040;
+  }
+
+  body.dark-mode .job-item:hover {
+    background: #333;
+  }
 }

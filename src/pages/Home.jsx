@@ -22,8 +22,13 @@ const Home = () => {
       setPipeline(pipelineData);
 
       // Fetch recent leads (for "New Leads for You" section)
+      // Sort by _id descending to get newest leads first (ObjectId contains timestamp)
       try {
-        const leadsData = await api.leads.getAll({ page: 1, limit: 4 });
+        const leadsData = await api.leads.getAll({
+          page: 1,
+          limit: 4,
+          sort: '-_id'
+        });
         setRecentLeads(leadsData.leads || []);
       } catch (err) {
         console.error('Error fetching recent leads:', err);
@@ -35,11 +40,20 @@ const Home = () => {
     }
   };
 
-  // Helper to get leads for a specific status (limit to 3 for home page)
-  const getLeadsByStatus = (status, limit = 3) => {
+  // Helper to get leads for a specific status (limit to 8 for home page)
+  const getLeadsByStatus = (status, limit = 8) => {
     const stage = pipeline.find(s => s._id === status);
     const leads = stage?.leads || [];
-    return leads.slice(0, limit);
+
+    // Sort by priority first, then limit
+    const priorityValue = { "high": 3, "medium": 2, "low": 1 };
+    const sortedLeads = [...leads].sort((a, b) => {
+      const aPriority = priorityValue[a.userLead?.priority] ?? 0;
+      const bPriority = priorityValue[b.userLead?.priority] ?? 0;
+      return bPriority - aPriority;
+    });
+
+    return sortedLeads.slice(0, limit);
   };
 
   // Status display mapping
@@ -75,13 +89,13 @@ const Home = () => {
           <div className="pipeline">
             {statusColumns.map(column => {
               const leads = getLeadsByStatus(column.id);
-              const totalCount = pipeline.find(s => s._id === column.id)?.count || 0;
+              // const totalCount = pipeline.find(s => s._id === column.id)?.count || 0;
 
               return (
                 <div key={column.id} className="pipeline-col">
                   <div className="pipeline-col-header">
                     <span>{column.title}</span>
-                    <span className="count">{totalCount}</span>
+                    {/* <span className="count">{totalCount}</span> */}
                   </div>
                   {leads.length > 0 ? (
                     leads.map(({ userLead, leadDetails }) => (

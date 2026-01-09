@@ -643,3 +643,110 @@ body.dark-mode .priority-low {
     color: #66bb6a;
     border-color: #2f5a2f;
 }
+
+/* Filter toggle button for mobile */
+.filter-toggle-btn {
+    display: none;
+    background: #ff6600;
+    color: #ffffff;
+    border: 1px solid #ff6600;
+    padding: 6px 12px;
+    font-size: 10pt;
+    cursor: pointer;
+    margin-bottom: 8px;
+    font-family: Verdana, Geneva, sans-serif;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-toggle-btn:hover {
+    background: #cc5200;
+    border-color: #cc5200;
+}
+
+.filter-toggle-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Show results button */
+.show-results-btn {
+    display: none;
+    background: #ff6600;
+    color: #ffffff;
+    border: 1px solid #ff6600;
+    padding: 8px 16px;
+    font-size: 10pt;
+    cursor: pointer;
+    margin-top: 12px;
+    width: 100%;
+    font-family: Verdana, Geneva, sans-serif;
+    font-weight: bold;
+}
+
+.show-results-btn:hover {
+    background: #cc5200;
+    border-color: #cc5200;
+}
+
+/* Mobile Responsive - under 600px */
+@media (max-width: 600px) {
+    .filter-toggle-btn {
+        display: flex;
+    }
+
+    .show-results-btn {
+        display: block;
+    }
+
+    .filter-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        z-index: 1000;
+        overflow-y: auto;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .filter-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .filter-section {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .leads-table-container {
+        width: 100%;
+    }
+
+    .leads-content {
+        display: block;
+    }
+
+    /* Dark mode adjustments */
+    body.dark-mode .filter-sidebar {
+        background: #1a1a1a;
+    }
+
+    body.dark-mode .filter-toggle-btn {
+        background: #ff6600;
+        border-color: #ff6600;
+    }
+
+    body.dark-mode .show-results-btn {
+        background: #ff6600;
+        border-color: #ff6600;
+    }
+
+    /* Center button text on mobile */
+    .btn-add-lead {
+        text-align: center;
+    }
+}

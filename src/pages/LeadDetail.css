@@ -212,13 +212,14 @@
  }
 
  .btn-primary {
-     background: #ff6600;
-     color: #ffffff;
-     border-color: #ff6600;
+     background: #ff6600 !important;
+     color: #ffffff !important;
+     border-color: #ff6600 !important;
  }
 
  .btn-primary:hover {
-     background: #cc5200;
+     background: #cc5200 !important;
+     border-color: #cc5200 !important;
  }
 
  .btn-saved {
@@ -484,4 +485,47 @@ body.dark-mode .add-note textarea {
 
 body.dark-mode .add-note textarea::placeholder {
     color: #666;
+}
+
+body.dark-mode .back-link {
+    background-color: #000000;
+    padding: 4px 8px;
+}
+
+/* Mobile Responsive - under 600px */
+@media (max-width: 600px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-table input,
+    .form-table select,
+    .form-table textarea {
+        width: 100%;
+    }
+
+    /* Keep date picker at its original width */
+    .form-table input[type="date"] {
+        width: 112px;
+    }
+
+    .form-table td:first-child {
+        width: 100%;
+        display: block;
+        padding-bottom: 4px;
+    }
+
+    .form-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
 }

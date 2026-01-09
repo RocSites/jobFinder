@@ -32,7 +32,8 @@ const Leads = () => {
     industries: new Set(),
     teams: new Set(),
     priorities: new Set(),
-    saved: false // true = show only saved, false = show all
+    saved: false, // true = show only saved, false = show all
+    hideSaved: false // true = hide saved leads, false = show all
   });
 
   // Search state
@@ -47,6 +48,9 @@ const Leads = () => {
     priorities: true,
     saved: true
   });
+
+  // Mobile filter drawer state
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   const toggleCollapse = (category) => {
     setCollapsed(prev => ({
@@ -176,7 +180,17 @@ const Leads = () => {
   const toggleSavedFilter = () => {
     setFilters(prev => ({
       ...prev,
-      saved: !prev.saved
+      saved: !prev.saved,
+      hideSaved: false // Turn off hideSaved when showing only saved
+    }));
+  };
+
+  // Toggle hide saved filter
+  const toggleHideSavedFilter = () => {
+    setFilters(prev => ({
+      ...prev,
+      hideSaved: !prev.hideSaved,
+      saved: false // Turn off saved when hiding saved
     }));
   };
 
@@ -188,7 +202,8 @@ const Leads = () => {
       industries: new Set(),
       teams: new Set(),
       priorities: new Set(),
-      saved: false
+      saved: false,
+      hideSaved: false
     });
   };
 
@@ -206,8 +221,13 @@ const Leads = () => {
         if (!matchesSearch) return false;
       }
 
-      // Check saved filter
+      // Check saved filter (show only saved)
       if (filters.saved && !savedLeads.has(lead._id)) {
+        return false;
+      }
+
+      // Check hide saved filter (hide all saved leads)
+      if (filters.hideSaved && savedLeads.has(lead._id)) {
         return false;
       }
 
@@ -295,8 +315,21 @@ const Leads = () => {
           <Link to="/leads/new" className="btn-add-lead">Add Lead</Link>
         </div>
 
+        {/* Mobile filter toggle button */}
+        <button
+          className="filter-toggle-btn"
+          onClick={() => setFilterDrawerOpen(true)}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+          Filters
+        </button>
+
         <div className="leads-content">
-          <div className="filter-sidebar">
+          <div className={`filter-sidebar ${filterDrawerOpen ? 'open' : ''}`}>
             <div className="filter-section">
               <div className="filter-header">
                 <div className="filter-title">Filters</div>
@@ -323,6 +356,14 @@ const Leads = () => {
                         onChange={toggleSavedFilter}
                       />
                       <span>Saved Jobs Only</span>
+                    </label>
+                    <label className="filter-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={filters.hideSaved}
+                        onChange={toggleHideSavedFilter}
+                      />
+                      <span>Hide Saved Jobs</span>
                     </label>
                   </div>
                 )}
@@ -451,7 +492,13 @@ const Leads = () => {
                 )}
               </div>
 
-
+              {/* Show results button for mobile */}
+              <button
+                className="show-results-btn"
+                onClick={() => setFilterDrawerOpen(false)}
+              >
+                Show Results ({filteredAndSortedLeads.length})
+              </button>
             </div>
           </div>
 

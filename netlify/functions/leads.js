@@ -26,12 +26,38 @@ export const handler = async (event) => {
         const lead = await collection.findOne({ _id: new ObjectId(id) });
         return { statusCode: 200, body: JSON.stringify(lead) };
       }
-      const allLeads = await collection.find({}).toArray();
+
+      // Parse query parameters for pagination and sorting
+      const { page = '1', limit = '10', sort = '-_id' } = event.queryStringParameters || {};
+      const pageNum = parseInt(page, 10);
+      const limitNum = parseInt(limit, 10);
+      const skip = (pageNum - 1) * limitNum;
+
+      // Parse sort parameter (e.g., '-_id' means descending by ObjectId/creation time)
+      const sortField = sort.startsWith('-') ? sort.substring(1) : sort;
+      const sortOrder = sort.startsWith('-') ? -1 : 1;
+      const sortObj = { [sortField]: sortOrder };
+
+      // Get total count for pagination
+      const totalLeads = await collection.countDocuments({});
+
+      // Fetch leads with pagination and sorting
+      // Sorting by _id (descending) gives us newest first since ObjectId contains timestamp
+      const allLeads = await collection
+        .find({})
+        .sort(sortObj)
+        .skip(skip)
+        .limit(limitNum)
+        .toArray();
+
       return {
         statusCode: 200,
         body: JSON.stringify({
           leads: allLeads,
-          totalLeads: allLeads.length
+          totalLeads,
+          page: pageNum,
+          limit: limitNum,
+          totalPages: Math.ceil(totalLeads / limitNum)
         })
       };
     }
