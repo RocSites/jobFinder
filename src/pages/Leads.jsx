@@ -5,9 +5,11 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Leads.css';
 import api from '../api/client';
+import { useToast } from '../hooks/useToast.jsx';
 
 const Leads = () => {
   const location = useLocation();
+  const { showToast, ToastComponent } = useToast();
   const [leads, setLeads] = useState([]);
   const [savedLeads, setSavedLeads] = useState(new Set());
   const [userLeadsMap, setUserLeadsMap] = useState(new Map()); // Map of leadId -> userLead data
@@ -117,7 +119,7 @@ const Leads = () => {
       // Update saved leads set
       setSavedLeads(prev => new Set([...prev, leadId]));
     } catch (err) {
-      alert(`Error saving lead: ${err.message}`);
+      showToast(`Error saving lead: ${err.message}`, 'error');
     }
   };
 
@@ -659,6 +661,7 @@ const Leads = () => {
           </div>
         </div>
       </div>
+      <ToastComponent />
     </div>
   );
 };

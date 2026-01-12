@@ -5,9 +5,11 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Pipeline.css';
 import api from '../api/client';
+import { useToast } from '../hooks/useToast.jsx';
 
 const Pipeline = () => {
   const location = useLocation();
+  const { showToast, ToastComponent } = useToast();
   const [pipeline, setPipeline] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,7 +53,7 @@ const Pipeline = () => {
       // Refresh pipeline
       fetchPipeline();
     } catch (err) {
-      alert(`Error updating status: ${err.message}`);
+      showToast(`Error updating status: ${err.message}`, 'error');
     }
   };
 
@@ -208,6 +210,7 @@ const Pipeline = () => {
           );
         })}
       </div>
+      <ToastComponent />
     </div>
   );
 };

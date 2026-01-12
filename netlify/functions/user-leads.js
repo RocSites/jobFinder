@@ -33,7 +33,13 @@ export const handler = async (event) => {
       // /user-leads/:id/activity
       if (activity === 'true' && id) {
         const lead = await collection.findOne({ _id: new ObjectId(id) });
-        return { statusCode: 200, body: JSON.stringify(lead?.activity || []) };
+        // Transform statusHistory to activity format
+        const activityData = (lead?.statusHistory || []).map(item => ({
+          createdAt: item.timestamp,
+          action: 'status_change',
+          description: item.note || `Status changed to ${item.status}`
+        }));
+        return { statusCode: 200, body: JSON.stringify(activityData) };
       }
 
       // single user-lead

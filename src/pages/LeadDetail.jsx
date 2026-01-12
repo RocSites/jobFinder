@@ -4,12 +4,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
+import { useToast } from '../hooks/useToast.jsx';
 import './LeadDetail.css';
 
 const LeadDetail = () => {
   const { leadId } = useParams();
   const navigate = useNavigate();
   const isNewLead = leadId === 'new';
+  const { showToast, ToastComponent } = useToast();
 
   const [lead, setLead] = useState(null);
   const [userLead, setUserLead] = useState(null);
@@ -36,20 +38,70 @@ const LeadDetail = () => {
 
   const parseJobUrl = async (url) => {
     try {
-      // Fetch the URL content
-      const response = await fetch(url);
-      const html = await response.text();
+      // Use backend proxy to fetch URL and avoid CORS issues
+      const response = await fetch('/.netlify/functions/parse-job-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch job URL');
+      }
+
+      const { html } = await response.json();
 
       // Create a DOM parser
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
 
-      // Extract job details - these selectors may need adjustment based on the actual site structure
-      const title = doc.querySelector('h1')?.textContent?.trim() || '';
-      const company = doc.querySelector('[class*="company"]')?.textContent?.trim() ||
-                     doc.querySelector('[class*="Company"]')?.textContent?.trim() || '';
-      const location = doc.querySelector('[class*="location"]')?.textContent?.trim() ||
-                      doc.querySelector('[class*="Location"]')?.textContent?.trim() || '';
+      // Extract job title - try multiple selectors
+      let title = doc.querySelector('h1')?.textContent?.trim() ||
+                  doc.querySelector('h2')?.textContent?.trim() ||
+                  doc.querySelector('[class*="title"]')?.textContent?.trim() ||
+                  doc.querySelector('[class*="job-title"]')?.textContent?.trim() || '';
+
+      // Extract company name - try multiple methods
+      let company = doc.querySelector('[class*="company"]')?.textContent?.trim() ||
+                    doc.querySelector('[class*="Company"]')?.textContent?.trim() ||
+                    doc.querySelector('[class*="employer"]')?.textContent?.trim() || '';
+
+      // If company not found in DOM, try to extract from URL
+      if (!company) {
+        const urlMatch = url.match(/\/\/([^.\/]+)\./);
+        if (urlMatch && urlMatch[1]) {
+          company = urlMatch[1].charAt(0).toUpperCase() + urlMatch[1].slice(1);
+        }
+      }
+
+      // Extract location - try multiple selectors and smart filtering
+      let location = doc.querySelector('[class*="location"]')?.textContent?.trim() ||
+                     doc.querySelector('[class*="Location"]')?.textContent?.trim() ||
+                     doc.querySelector('[class*="office"]')?.textContent?.trim() || '';
+
+      // If no location found, search for "Remote" in the page text
+      if (!location) {
+        const bodyText = doc.body?.textContent || '';
+        if (/\b(remote|work from home|wfh)\b/i.test(bodyText)) {
+          location = 'Remote';
+        }
+      }
+
+      // Also check URL path for location hints like "usa-remote"
+      if (!location || location.length > 100) {
+        const urlLocationMatch = url.match(/\/(usa|us|remote|anywhere|global)[\-_]?(remote|anywhere)?/i);
+        if (urlLocationMatch) {
+          const parts = urlLocationMatch[0].split(/[\-_\/]/).filter(p => p && p !== 'co');
+          location = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+        }
+      }
+
+      // Filter out locations that are too long (likely not a real location)
+      if (location && location.length > 100) {
+        location = '';
+      }
 
       // Try to find compensation - look for salary, compensation keywords
       let compensation = '';
@@ -81,14 +133,14 @@ const LeadDetail = () => {
       return { title, company, location, compensation, datePosted };
     } catch (error) {
       console.error('Error parsing job URL:', error);
-      alert('Error parsing the job URL. Please check the URL and try again.');
+      showToast('Error parsing the job URL. Please check the URL and try again.', 'error');
       return null;
     }
   };
 
   const handleImportUrl = async () => {
     if (!importUrl.trim()) {
-      alert('Please enter a URL');
+      showToast('Please enter a URL', 'error');
       return;
     }
 
@@ -197,7 +249,7 @@ const LeadDetail = () => {
           currentStatus: 'saved'
         });
 
-        alert('Lead created and saved to pipeline!');
+        showToast('Lead created and saved to pipeline!', 'success');
         navigate(`/leads/${createdLead._id}`);
       } else if (userLead) {
         // Update existing userLead
@@ -240,11 +292,11 @@ const LeadDetail = () => {
           priority,
           notes
         });
-        alert('Lead saved to pipeline!');
+        showToast('Lead saved to pipeline!', 'success');
         fetchLeadDetails(); // Refresh to get the new userLead
       }
     } catch (err) {
-      alert(`Error saving: ${err.message}`);
+      showToast(`Error saving: ${err.message}`, 'error');
     }
   };
 
@@ -252,7 +304,7 @@ const LeadDetail = () => {
     const newStatus = e.target.value;
 
     if (!userLead) {
-      alert('Please save the lead first');
+      showToast('Please save the lead first', 'error');
       e.target.value = status; // Reset dropdown
       return;
     }
@@ -267,7 +319,7 @@ const LeadDetail = () => {
       // Refresh activity to show the status change in timeline
       await fetchLeadDetails();
     } catch (err) {
-      alert(`Error updating status: ${err.message}`);
+      showToast(`Error updating status: ${err.message}`, 'error');
       // Revert on error
       setStatus(status);
       e.target.value = status; // Reset dropdown on error
@@ -284,9 +336,9 @@ const LeadDetail = () => {
     if (userLead) {
       try {
         await api.userLeads.update(userLead._id, { notes: updatedNotes });
-        alert('Note added!');
+        showToast('Note added!', 'success');
       } catch (err) {
-        alert(`Error saving note: ${err.message}`);
+        showToast(`Error saving note: ${err.message}`, 'error');
       }
     }
   };
@@ -300,10 +352,10 @@ const LeadDetail = () => {
     if (window.confirm('Remove this lead from your pipeline?')) {
       try {
         await api.userLeads.remove(userLead._id);
-        alert('Lead removed from pipeline');
+        showToast('Lead removed from pipeline', 'success');
         navigate('/pipeline');
       } catch (err) {
-        alert(`Error deleting: ${err.message}`);
+        showToast(`Error deleting: ${err.message}`, 'error');
       }
     }
   };
@@ -568,7 +620,7 @@ const LeadDetail = () => {
                               });
                               await fetchLeadDetails();
                             } catch (err) {
-                              alert(`Error saving lead: ${err.message}`);
+                              showToast(`Error saving lead: ${err.message}`, 'error');
                             }
                           }}
                         >
@@ -660,13 +712,24 @@ const LeadDetail = () => {
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      rows="6"
+                      rows="10"
                       placeholder="Add your notes about this opportunity..."
                     />
                   </td>
                 </tr>
               </tbody>
             </table>
+            <div className="add-note">
+              <textarea
+                placeholder="Add notes here..."
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                rows="5"
+              />
+              <button className="btn btn-primary" onClick={handleAddNote}>
+                Add Note
+              </button>
+            </div>
           </div>
 
           <div className="actions">
@@ -711,21 +774,11 @@ const LeadDetail = () => {
                 <div className="activity-text">Save this lead to start tracking activity</div>
               </div>
             )}
-
-            <div className="add-note">
-              <textarea
-                placeholder="Add a quick note..."
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                rows="3"
-              />
-              <button className="btn btn-primary" onClick={handleAddNote}>
-                Add Note
-              </button>
-            </div>
           </div>
         </div>
       </div>
+
+      <ToastComponent />
     </div>
   );
 };
