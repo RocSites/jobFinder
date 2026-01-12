@@ -69,6 +69,28 @@
      margin-bottom: 12px;
  }
 
+ .page-title-row {
+     display: flex;
+     align-items: center;
+     gap: 12px;
+     margin-bottom: 4px;
+ }
+
+ .btn-import {
+     font-size: 9pt;
+     padding: 4px 12px;
+     background: #ff6600;
+     color: #ffffff;
+     border: 1px solid #ff6600;
+     cursor: pointer;
+     font-family: Verdana, Geneva, sans-serif;
+ }
+
+ .btn-import:hover {
+     background: #cc5200;
+     border-color: #cc5200;
+ }
+
  .back-link {
      font-size: 9pt;
      color: #ff6600;
@@ -492,6 +514,166 @@ body.dark-mode .back-link {
     padding: 4px 8px;
 }
 
+/* Import Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #ffffff;
+    border: 1px solid #e6e6df;
+    max-width: 500px;
+    width: 90%;
+    font-family: Verdana, Geneva, sans-serif;
+}
+
+.modal-header {
+    padding: 12px;
+    border-bottom: 1px solid #e6e6df;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 0;
+    color: #000000;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24pt;
+    cursor: pointer;
+    color: #828282;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #000000;
+}
+
+.modal-body {
+    padding: 16px;
+}
+
+.modal-instruction {
+    font-size: 9pt;
+    color: #828282;
+    margin-bottom: 12px;
+}
+
+.modal-body label {
+    font-size: 9pt;
+    font-weight: bold;
+    color: #000000;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 6px;
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 9pt;
+    border: 1px solid #e6e6df;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: #ff6600;
+}
+
+.modal-footer {
+    padding: 12px;
+    border-top: 1px solid #e6e6df;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* Dark Mode Modal Styles */
+body.dark-mode .modal-overlay {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode .modal-content {
+    background: #2a2a2a;
+    border-color: #404040;
+}
+
+body.dark-mode .modal-header {
+    border-color: #404040;
+}
+
+body.dark-mode .modal-header h3 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .modal-close {
+    color: #999;
+}
+
+body.dark-mode .modal-close:hover {
+    color: #e0e0e0;
+}
+
+body.dark-mode .modal-instruction {
+    color: #999;
+}
+
+body.dark-mode .modal-body label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .modal-input {
+    background: #1a1a1a;
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+body.dark-mode .modal-input:focus {
+    border-color: #ff6600;
+}
+
+body.dark-mode .modal-footer {
+    border-color: #404040;
+}
+
+body.dark-mode .btn-import {
+    background: #ff6600;
+    color: #ffffff;
+    border-color: #ff6600;
+}
+
+body.dark-mode .btn-import:hover {
+    background: #cc5200;
+    border-color: #cc5200;
+}
+
+body.dark-mode .page-title-row {
+    color: #e0e0e0;
+}
+
 /* Mobile Responsive - under 600px */
 @media (max-width: 600px) {
     .content-grid {
@@ -527,5 +709,15 @@ body.dark-mode .back-link {
     .btn {
         width: 100%;
         text-align: center;
+    }
+
+    .page-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .modal-content {
+        width: 95%;
     }
 }

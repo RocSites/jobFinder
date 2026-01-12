@@ -30,6 +30,84 @@ const LeadDetail = () => {
   // Save button state
   const [showSavedConfirmation, setShowSavedConfirmation] = useState(false);
 
+  // Import modal state
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importUrl, setImportUrl] = useState('');
+
+  const parseJobUrl = async (url) => {
+    try {
+      // Fetch the URL content
+      const response = await fetch(url);
+      const html = await response.text();
+
+      // Create a DOM parser
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Extract job details - these selectors may need adjustment based on the actual site structure
+      const title = doc.querySelector('h1')?.textContent?.trim() || '';
+      const company = doc.querySelector('[class*="company"]')?.textContent?.trim() ||
+                     doc.querySelector('[class*="Company"]')?.textContent?.trim() || '';
+      const location = doc.querySelector('[class*="location"]')?.textContent?.trim() ||
+                      doc.querySelector('[class*="Location"]')?.textContent?.trim() || '';
+
+      // Try to find compensation - look for salary, compensation keywords
+      let compensation = '';
+      const compElements = doc.querySelectorAll('*');
+      for (let el of compElements) {
+        const text = el.textContent;
+        if (text && (text.includes('$') || text.includes('salary') || text.includes('compensation'))) {
+          const match = text.match(/\$[\d,]+(k|K)?\s*-?\s*\$?[\d,]+(k|K)?/);
+          if (match) {
+            compensation = match[0];
+            break;
+          }
+        }
+      }
+
+      // Try to find date posted
+      let datePosted = '';
+      const dateElements = doc.querySelectorAll('[class*="date"], [class*="posted"], time');
+      if (dateElements.length > 0) {
+        const dateText = dateElements[0].textContent?.trim() || dateElements[0].getAttribute('datetime');
+        if (dateText) {
+          const date = new Date(dateText);
+          if (!isNaN(date.getTime())) {
+            datePosted = date.toISOString().split('T')[0];
+          }
+        }
+      }
+
+      return { title, company, location, compensation, datePosted };
+    } catch (error) {
+      console.error('Error parsing job URL:', error);
+      alert('Error parsing the job URL. Please check the URL and try again.');
+      return null;
+    }
+  };
+
+  const handleImportUrl = async () => {
+    if (!importUrl.trim()) {
+      alert('Please enter a URL');
+      return;
+    }
+
+    const jobData = await parseJobUrl(importUrl);
+    if (jobData) {
+      setLead({
+        ...lead,
+        title: jobData.title || lead.title,
+        company: jobData.company || lead.company,
+        location: jobData.location || lead.location,
+        compensation: { raw: jobData.compensation || lead.compensation?.raw || '' },
+        datePosted: jobData.datePosted || lead.datePosted,
+        sourceApplicationLink: importUrl
+      });
+      setShowImportModal(false);
+      setImportUrl('');
+    }
+  };
+
   useEffect(() => {
     if (isNewLead) {
       // Initialize empty lead for new entry
@@ -252,9 +330,49 @@ const LeadDetail = () => {
     <div className="main">
       <div className="page-header">
         <button onClick={() => navigate(-1, { state: { refresh: Date.now() } })} className="back-link">← back</button>
-        <div className="page-title">{isNewLead ? 'Add New Lead' : lead.title}</div>
+        <div className="page-title-row">
+          <div className="page-title">{isNewLead ? 'Add New Lead' : lead.title}</div>
+          {isNewLead && (
+            <button className="btn btn-import" onClick={() => setShowImportModal(true)}>
+              Import Lead
+            </button>
+          )}
+        </div>
         {!isNewLead && <div className="page-subtitle">{lead.company} | {lead.location}</div>}
       </div>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="modal-overlay" onClick={() => setShowImportModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Import Lead from URL</h3>
+              <button className="modal-close" onClick={() => setShowImportModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <p className="modal-instruction">Copy and paste the link to the job application and click Import</p>
+              <label htmlFor="import-url-input">Application URL</label>
+              <input
+                id="import-url-input"
+                type="text"
+                className="modal-input"
+                placeholder="https://example.com/jobs/1234"
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleImportUrl();
+                  }
+                }}
+              />
+            </div>
+            <div className="modal-footer">
+              <button className="btn" onClick={() => setShowImportModal(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleImportUrl}>Import</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="content-grid">
         <div className="main-col">
@@ -557,7 +675,7 @@ const LeadDetail = () => {
               onClick={handleSave}
               disabled={showSavedConfirmation}
             >
-              {showSavedConfirmation ? 'Saved' : (isNewLead ? 'Create Lead' : userLead ? 'Save Changes' : 'Save Lead to Pipeline')}
+              {showSavedConfirmation ? 'Saved' : (isNewLead ? 'Add Lead' : userLead ? 'Save Changes' : 'Save Lead to Pipeline')}
             </button>
             <button className="btn btn-danger" onClick={handleDelete}>
               {userLead ? 'Remove from Pipeline' : 'Back'}

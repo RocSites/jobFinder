@@ -19,6 +19,7 @@
         "npm:eslint-plugin-react-refresh@~0.4.24",
         "npm:eslint@^9.39.1",
         "npm:globals@^16.5.0",
+        "npm:mongodb@7",
         "npm:react-dom@^19.2.0",
         "npm:react-router-dom@^7.11.0",
         "npm:react@^19.2.0",
