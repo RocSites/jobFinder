@@ -115,10 +115,46 @@ export const userLeadsAPI = {
   },
 };
 
+// Referrals API
+export const referralsAPI = {
+  // Get all referrals
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return fetchAPI(`/referrals${queryString ? `?${queryString}` : ''}`);
+  },
+
+  // Get single referral by ID
+  getById: (id) => fetchAPI(`/referrals?id=${id}`),
+
+  // Get activity timeline for a referral
+  getActivity: (id) => {
+    const params = new URLSearchParams({ id, activity: 'true' });
+    return fetchAPI(`/referrals?${params.toString()}`);
+  },
+
+  // Create new referral
+  create: (data) => fetchAPI('/referrals', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  // Update referral
+  update: (id, data) => fetchAPI(`/referrals?id=${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+
+  // Delete referral
+  delete: (id) => fetchAPI(`/referrals?id=${id}`, {
+    method: 'DELETE',
+  }),
+};
+
 // Export combined API object
 export const api = {
   leads: leadsAPI,
   userLeads: userLeadsAPI,
+  referrals: referralsAPI,
 };
 
 export default api;

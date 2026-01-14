@@ -27,8 +27,9 @@ const Header = () => {
                 <div className="header-inner">
                     <Link to="/" className="logo active">GigFrog</Link>
                     <nav className="nav">
-                        <Link to="/leads">leads</Link>
                         <Link to="/pipeline">pipeline</Link>
+                        <Link to="/leads">leads</Link>
+                        <Link to="/referrals">referrals</Link>
                         {/* <Link to="/">interviews</Link> */}
                         {/* <Link to="/">messages</Link> */}
                     </nav>

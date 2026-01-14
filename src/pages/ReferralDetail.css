@@ -1,0 +1,381 @@
+/* ReferralDetail page styles */
+
+.page-header {
+    margin-bottom: 12px;
+}
+
+.btn-back {
+    background: #cccccc;
+    color: #000000;
+    padding: 4px 8px;
+    font-size: 9pt;
+    border: 1px solid #cccccc;
+    cursor: pointer;
+    font-family: Verdana, Geneva, sans-serif;
+    margin-bottom: 8px;
+}
+
+.btn-back:hover {
+    background: #bbbbbb;
+    border-color: #bbbbbb;
+}
+
+.referral-detail-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+}
+
+.main-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.side-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.section {
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 8px;
+}
+
+.section-title {
+    font-weight: bold;
+    font-size: 10pt;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    font-size: 9pt;
+    margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 4px 6px;
+    font-size: 9pt;
+    font-family: Verdana, Geneva, sans-serif;
+    border: 1px solid #cccccc;
+    background: #ffffff;
+    color: #000000;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    margin-top: 12px;
+}
+
+.btn {
+    background: #ffffff;
+    color: #000000;
+    padding: 4px 8px;
+    font-size: 9pt;
+    border: 1px solid #cccccc;
+    cursor: pointer;
+    font-family: Verdana, Geneva, sans-serif;
+}
+
+.btn:hover {
+    background: #f0f0f0;
+}
+
+.btn-primary {
+    background: #ff6600;
+    color: #ffffff;
+    border-color: #ff6600;
+}
+
+.btn-primary:hover {
+    background: #ff7711;
+    border-color: #ff7711;
+}
+
+/* Linked Leads */
+.linked-leads-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.linked-lead-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: #f6f6ef;
+    border: 1px solid #cccccc;
+    border-radius: 2px;
+}
+
+.linked-lead-info {
+    flex: 1;
+}
+
+.linked-lead-title {
+    font-weight: bold;
+    font-size: 9pt;
+    margin-bottom: 2px;
+}
+
+.linked-lead-title a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.linked-lead-title a:hover {
+    text-decoration: underline;
+}
+
+.linked-lead-company {
+    font-size: 8pt;
+    color: #666666;
+}
+
+.btn-unlink {
+    background: #cc0000;
+    color: #ffffff;
+    border: 1px solid #cc0000;
+    padding: 2px 8px;
+    font-size: 12pt;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.btn-unlink:hover {
+    background: #990000;
+    border-color: #990000;
+}
+
+.empty-message {
+    font-size: 9pt;
+    color: #666666;
+    font-style: italic;
+}
+
+/* Activity Timeline */
+.activity-item {
+    padding: 8px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-meta {
+    font-size: 8pt;
+    color: #666666;
+    margin-bottom: 4px;
+}
+
+.activity-text {
+    font-size: 9pt;
+    color: #000000;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 16px;
+    min-width: 400px;
+    max-width: 600px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #cccccc;
+}
+
+.modal-header h3 {
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 18pt;
+    cursor: pointer;
+    color: #666666;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #000000;
+}
+
+.modal-body {
+    margin-bottom: 12px;
+}
+
+.modal-instruction {
+    font-size: 9pt;
+    margin-bottom: 12px;
+    color: #666666;
+}
+
+.modal-select {
+    width: 100%;
+    padding: 4px 6px;
+    font-size: 9pt;
+    font-family: Verdana, Geneva, sans-serif;
+    border: 1px solid #cccccc;
+    background: #ffffff;
+    color: #000000;
+    margin-top: 4px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* Dark mode support */
+body.dark-mode .section {
+    background: #1a1a1a;
+    border-color: #444444;
+}
+
+body.dark-mode .section-title {
+    border-bottom-color: #444444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group textarea,
+body.dark-mode .form-group select,
+body.dark-mode .modal-select {
+    background: #2a2a2a;
+    border-color: #444444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .form-group label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .btn {
+    background: #2a2a2a;
+    border-color: #444444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .btn:hover {
+    background: #333333;
+}
+
+body.dark-mode .btn-back {
+    background: #444444;
+    border-color: #444444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .btn-back:hover {
+    background: #555555;
+    border-color: #555555;
+}
+
+body.dark-mode .linked-lead-item {
+    background: #2a2a2a;
+    border-color: #444444;
+}
+
+body.dark-mode .linked-lead-title a {
+    color: #e0e0e0;
+}
+
+body.dark-mode .linked-lead-company {
+    color: #999999;
+}
+
+body.dark-mode .activity-meta {
+    color: #999999;
+}
+
+body.dark-mode .activity-text {
+    color: #e0e0e0;
+}
+
+body.dark-mode .activity-item {
+    border-bottom-color: #333333;
+}
+
+body.dark-mode .modal-content {
+    background: #1a1a1a;
+    border-color: #444444;
+}
+
+body.dark-mode .modal-header {
+    border-bottom-color: #444444;
+}
+
+body.dark-mode .modal-header h3 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .modal-close {
+    color: #999999;
+}
+
+body.dark-mode .modal-close:hover {
+    color: #e0e0e0;
+}
+
+body.dark-mode .modal-instruction {
+    color: #999999;
+}
+
+body.dark-mode .empty-message {
+    color: #999999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .referral-detail-content {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        min-width: 90%;
+        max-width: 90%;
+    }
+}

@@ -1,0 +1,126 @@
+/* Referrals page styles */
+
+.btn-add-referral {
+    background: #ff6600;
+    color: #ffffff !important;
+    padding: 4px 8px;
+    font-size: 9pt;
+    border: 1px solid #ff6600;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Verdana, Geneva, sans-serif;
+}
+
+.btn-add-referral:hover {
+    background: #ff7711;
+    border-color: #ff7711;
+}
+
+.referrals-table-container {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.referrals-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    background: #ffffff;
+}
+
+.referrals-table thead {
+    background: #f6f6ef;
+    border-bottom: 1px solid #cccccc;
+}
+
+.referrals-table th {
+    padding: 6px 8px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 9pt;
+}
+
+.referrals-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.referrals-table tbody tr:hover {
+    background: #f6f6ef;
+}
+
+.referral-link {
+    color: #000000;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.referral-link:hover {
+    text-decoration: underline;
+}
+
+.linkedin-link {
+    color: #0077b5;
+    text-decoration: none;
+}
+
+.linkedin-link:hover {
+    text-decoration: underline;
+}
+
+.linked-leads-count {
+    display: inline-block;
+    background: #ff6600;
+    color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 8pt;
+    font-weight: bold;
+}
+
+.copy-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #666666;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-icon-btn:hover {
+    color: #000000;
+}
+
+/* Dark mode support */
+body.dark-mode .referrals-table {
+    background: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .referrals-table thead {
+    background: #2a2a2a;
+    border-bottom-color: #444444;
+}
+
+body.dark-mode .referrals-table td {
+    border-bottom-color: #333333;
+}
+
+body.dark-mode .referrals-table tbody tr:hover {
+    background: #2a2a2a;
+}
+
+body.dark-mode .referral-link {
+    color: #e0e0e0;
+}
+
+body.dark-mode .copy-icon-btn {
+    color: #999999;
+}
+
+body.dark-mode .copy-icon-btn:hover {
+    color: #e0e0e0;
+}
