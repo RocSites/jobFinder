@@ -37,12 +37,12 @@ export const handler = async () => {
         // Lookup referrals that have this userLead linked
         $lookup: {
           from: 'referrals',
-          let: { userLeadId: '$_id' },
+          let: { userLeadIdStr: { $toString: '$_id' } },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $in: ['$$userLeadId', { $ifNull: ['$linkedLeads', []] }]
+                  $in: ['$$userLeadIdStr', { $ifNull: ['$linkedLeads', []] }]
                 }
               }
             }
@@ -86,6 +86,17 @@ export const handler = async () => {
         }
       }
     ]).toArray();
+
+    // Debug logging
+    if (pipeline.length > 0 && pipeline[0].leads && pipeline[0].leads.length > 0) {
+      const sampleLead = pipeline[0].leads[0];
+      console.log('Sample pipeline lead:', {
+        userLeadId: sampleLead.userLead?._id,
+        hasReferral: !!sampleLead.referral,
+        referralName: sampleLead.referral?.name,
+        referralLinkedLeads: sampleLead.referral?.linkedLeads
+      });
+    }
 
     return {
       statusCode: 200,
