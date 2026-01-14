@@ -79,7 +79,7 @@
  .btn-import {
      font-size: 9pt;
      padding: 4px 12px;
-     background: #ff6600;
+     background: #ff6600 !important;
      color: #ffffff;
      border: 1px solid #ff6600;
      cursor: pointer;
