@@ -100,8 +100,7 @@ const Leads = () => {
       // Calculate stats (you can also create a separate API endpoint for this)
       setStats({
         total: response.totalLeads || 0,
-        highPriority: 5, // This would come from your API
-        activeThisWeek: 8 // This would come from your API
+    
       });
     } catch (err) {
       setError(err.message);
@@ -308,8 +307,8 @@ const Leads = () => {
 
         <div className="stats">
           <span>{stats.total} leads</span>
-          <span>{stats.highPriority} high priority</span>
-          <span>{stats.activeThisWeek} active this week</span>
+          {/* <span>{stats.highPriority} high priority</span>
+          <span>{stats.activeThisWeek} active this week</span> */}
         </div>
 
         <div className="actions">

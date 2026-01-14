@@ -101,12 +101,12 @@ const Pipeline = () => {
     <div className="main">
       <div className="page-title">Pipeline</div>
 
-      <div className="stats">
+      {/* <div className="stats">
         <span>{stats.activeLeads} active leads</span>
         <span>{stats.applied} applications sent</span>
         <span>{stats.interviewing} interviews</span>
         <span>{stats.offers} offer{stats.offers !== 1 ? 's' : ''}</span>
-      </div>
+      </div> */}
       <Link to="/leads/new" className="btn-add-lead-pipeline">Add Lead</Link>
 
       <div className="pipeline-table">
