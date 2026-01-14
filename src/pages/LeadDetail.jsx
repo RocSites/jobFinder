@@ -819,7 +819,7 @@ const LeadDetail = () => {
                     </td>
                   </tr>
                 )}
-                {referral && (
+                {referral ? (
                   <>
                     <tr>
                       <td>Referral</td>
@@ -861,6 +861,18 @@ const LeadDetail = () => {
                       </tr>
                     )}
                   </>
+                ) : userLead && (
+                  <tr>
+                    <td>Referral</td>
+                    <td>
+                      <button
+                        className="btn-sm btn-secondary"
+                        onClick={() => navigate('/referrals/new', { state: { linkLeadId: userLead._id, leadTitle: lead?.title, leadCompany: lead?.company } })}
+                      >
+                        + Add Referral
+                      </button>
+                    </td>
+                  </tr>
                 )}
                 <tr>
                   <td>Notes</td>

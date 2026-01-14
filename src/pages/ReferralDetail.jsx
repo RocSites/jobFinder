@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/client';
 import { useToast } from '../hooks/useToast.jsx';
 import './ReferralDetail.css';
@@ -7,7 +7,13 @@ import './ReferralDetail.css';
 const ReferralDetail = () => {
   const { referralId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const isNewReferral = referralId === 'new';
+
+  // Get linkLeadId from navigation state (when coming from LeadDetail)
+  const linkLeadFromState = location.state?.linkLeadId;
+  const leadTitleFromState = location.state?.leadTitle;
+  const leadCompanyFromState = location.state?.leadCompany;
   const { showToast, ToastComponent } = useToast();
 
   const [referral, setReferral] = useState(null);
@@ -78,19 +84,25 @@ const ReferralDetail = () => {
         return;
       }
 
+      // Include linked lead from state if coming from LeadDetail
+      const linkedLeadsArray = referral?.linkedLeads || [];
+      if (isNewReferral && linkLeadFromState && !linkedLeadsArray.includes(linkLeadFromState)) {
+        linkedLeadsArray.push(linkLeadFromState);
+      }
+
       const referralData = {
         name: name.trim(),
         company: company.trim(),
         email: email.trim(),
         linkedin: linkedin.trim(),
         notes: notes.trim(),
-        linkedLeads: referral?.linkedLeads || []
+        linkedLeads: linkedLeadsArray
       };
 
       if (isNewReferral) {
         const newReferral = await api.referrals.create(referralData);
         showToast('Referral saved successfully', 'success');
-        navigate(`/referrals/${newReferral._id}`);
+        navigate(`/referrals/${newReferral._id}`, { replace: true });
       } else {
         await api.referrals.update(referralId, referralData);
         showToast('Referral updated successfully', 'success');
@@ -214,6 +226,13 @@ const ReferralDetail = () => {
 
         <div className="referral-detail-content">
           <div className="main-col">
+            {/* Show linked lead notice when coming from LeadDetail */}
+            {isNewReferral && linkLeadFromState && (
+              <div className="linked-lead-notice">
+                This referral will be linked to: <strong>{leadTitleFromState}</strong> at <strong>{leadCompanyFromState}</strong>
+              </div>
+            )}
+
             {/* Basic Information */}
             <div className="section">
               <div className="section-title">Basic Information</div>

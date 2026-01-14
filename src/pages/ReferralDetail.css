@@ -20,6 +20,22 @@
     border-color: #bbbbbb;
 }
 
+.linked-lead-notice {
+    background: #e6f4ea;
+    border: 1px solid #34a853;
+    color: #137333;
+    padding: 8px 12px;
+    font-size: 9pt;
+    margin-bottom: 12px;
+    border-radius: 4px;
+}
+
+body.dark-mode .linked-lead-notice {
+    background: #1e3a2f;
+    border-color: #34a853;
+    color: #81c995;
+}
+
 .referral-detail-content {
     display: grid;
     grid-template-columns: 2fr 1fr;
