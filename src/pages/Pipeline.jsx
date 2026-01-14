@@ -120,11 +120,7 @@ const Pipeline = () => {
                 {column.title} <span className="count">{count}</span>
               </div>
 
-              {leads.map(({ userLead, leadDetails, referral }) => {
-                // Debug logging
-                console.log('Pipeline card data:', { userLeadId: userLead._id, referral });
-
-                return (
+              {leads.map(({ userLead, leadDetails, referral }) => (
                 <div
                   key={userLead._id}
                   className="job-card"
@@ -239,8 +235,7 @@ const Pipeline = () => {
                     )}
                   </div>
                 </div>
-                );
-              })}
+              ))}
 
               {count === 0 && (
                 <div className="empty-state">
