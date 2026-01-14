@@ -16,6 +16,7 @@ const LeadDetail = () => {
   const [lead, setLead] = useState(null);
   const [userLead, setUserLead] = useState(null);
   const [activity, setActivity] = useState([]);
+  const [referral, setReferral] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -35,6 +36,9 @@ const LeadDetail = () => {
   // Import modal state
   const [showImportModal, setShowImportModal] = useState(false);
   const [importUrl, setImportUrl] = useState('');
+
+  // Track initial values to detect changes
+  const [initialValues, setInitialValues] = useState(null);
 
   const parseJobUrl = async (url) => {
     try {
@@ -163,7 +167,7 @@ const LeadDetail = () => {
   useEffect(() => {
     if (isNewLead) {
       // Initialize empty lead for new entry
-      setLead({
+      const emptyLead = {
         title: '',
         company: '',
         location: '',
@@ -176,8 +180,17 @@ const LeadDetail = () => {
         contactLinkedIn: '',
         sourceApplicationLink: '',
         sourceLink: ''
-      });
+      };
+      setLead(emptyLead);
       setStatus('saved'); // Auto-set to saved for new leads
+
+      // Capture initial values for new lead
+      setInitialValues({
+        lead: { ...emptyLead },
+        priority: 'medium',
+        notes: ''
+      });
+
       setLoading(false);
     } else {
       fetchLeadDetails();
@@ -200,9 +213,28 @@ const LeadDetail = () => {
         setStatus(userLeadData.currentStatus); // ✅ This now gets the correct status!
         setNotes(userLeadData.notes || '');
 
+        // Capture initial values for change detection
+        setInitialValues({
+          lead: { ...leadData },
+          priority: userLeadData.priority,
+          notes: userLeadData.notes || ''
+        });
+
         // Fetch activity using the ACTUAL userLead ID
         const activityData = await api.userLeads.getActivity(userLeadData._id);
         setActivity(activityData);
+
+        // Fetch referral if this lead is linked to any referral
+        try {
+          const allReferrals = await api.referrals.getAll();
+          const linkedReferral = allReferrals.find(ref =>
+            ref.linkedLeads?.includes(userLeadData._id)
+          );
+          setReferral(linkedReferral || null);
+        } catch (refErr) {
+          console.log('No referral linked to this lead');
+          setReferral(null);
+        }
       } catch (err) {
         // Lead not saved yet, that's ok
         console.log('Lead not saved by user yet');
@@ -211,6 +243,13 @@ const LeadDetail = () => {
         setStatus(null);
         setNotes('');
         setActivity([]);
+
+        // Capture initial values for new lead
+        setInitialValues({
+          lead: { ...leadData },
+          priority: 'medium',
+          notes: ''
+        });
       }
     } catch (err) {
       setError(err.message);
@@ -218,6 +257,38 @@ const LeadDetail = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const hasChanges = () => {
+    if (!initialValues || !lead) return false;
+
+    // Check if lead fields have changed
+    const leadChanged =
+      lead.title !== initialValues.lead.title ||
+      lead.company !== initialValues.lead.company ||
+      lead.location !== initialValues.lead.location ||
+      lead.team !== initialValues.lead.team ||
+      lead.compensation?.raw !== initialValues.lead.compensation?.raw ||
+      lead.industry !== initialValues.lead.industry ||
+      lead.datePosted !== initialValues.lead.datePosted ||
+      lead.contactName !== initialValues.lead.contactName ||
+      lead.contactEmail !== initialValues.lead.contactEmail ||
+      lead.contactLinkedIn !== initialValues.lead.contactLinkedIn ||
+      lead.sourceApplicationLink !== initialValues.lead.sourceApplicationLink ||
+      lead.sourceLink !== initialValues.lead.sourceLink;
+
+    // Check if notes have changed (priority auto-saves now)
+    const notesChanged = notes !== initialValues.notes;
+
+    return leadChanged || notesChanged;
+  };
+
+  const handleBackClick = async () => {
+    if (hasChanges()) {
+      // Auto-save if there are changes
+      await handleSave();
+    }
+    navigate(-1, { state: { refresh: Date.now() } });
   };
 
   const handleSave = async () => {
@@ -276,6 +347,13 @@ const LeadDetail = () => {
           setIsEditingContact(false);
         }
 
+        // Update initial values to reflect saved state
+        setInitialValues({
+          lead: { ...lead },
+          priority,
+          notes
+        });
+
         // Show "Saved" confirmation
         setShowSavedConfirmation(true);
 
@@ -323,6 +401,41 @@ const LeadDetail = () => {
       // Revert on error
       setStatus(status);
       e.target.value = status; // Reset dropdown on error
+    }
+  };
+
+  const handlePriorityChange = async (e) => {
+    const newPriority = e.target.value;
+
+    if (!userLead) {
+      showToast('Please save the lead first', 'error');
+      e.target.value = priority; // Reset dropdown
+      return;
+    }
+
+    try {
+      // Optimistically update UI
+      setPriority(newPriority);
+
+      // Make API call
+      await api.userLeads.update(userLead._id, { priority: newPriority });
+
+      // Update initial values to reflect the saved priority
+      setInitialValues({
+        ...initialValues,
+        priority: newPriority
+      });
+
+      // Show success feedback
+      showToast('Priority updated!', 'success');
+
+      // Refresh to get latest data
+      await fetchLeadDetails();
+    } catch (err) {
+      showToast(`Error updating priority: ${err.message}`, 'error');
+      // Revert on error
+      setPriority(priority);
+      e.target.value = priority; // Reset dropdown on error
     }
   };
 
@@ -381,7 +494,7 @@ const LeadDetail = () => {
   return (
     <div className="main">
       <div className="page-header">
-        <button onClick={() => navigate(-1, { state: { refresh: Date.now() } })} className="back-link">← back</button>
+        <button onClick={handleBackClick} className="back-link">← back</button>
         <div className="page-title-row">
           <div className="page-title">{isNewLead ? 'Add New Lead' : lead.title}</div>
           {isNewLead && (
@@ -518,7 +631,7 @@ const LeadDetail = () => {
                 <tr>
                   <td>Priority</td>
                   <td>
-                    <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+                    <select value={priority} onChange={handlePriorityChange}>
                       <option value="high">High</option>
                       <option value="medium">Medium</option>
                       <option value="low">Low</option>
@@ -705,6 +818,49 @@ const LeadDetail = () => {
                       )}
                     </td>
                   </tr>
+                )}
+                {referral && (
+                  <>
+                    <tr>
+                      <td>Referral</td>
+                      <td>
+                        <a href={`/referrals/${referral._id}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 'bold' }}>
+                          {referral.name}
+                        </a>
+                      </td>
+                    </tr>
+                    {referral.email && (
+                      <tr>
+                        <td>Referral Email</td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <a href={`mailto:${referral.email}`}>{referral.email}</a>
+                            <button
+                              className="copy-icon-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(referral.email);
+                                const button = e.currentTarget;
+                                const originalHTML = button.innerHTML;
+                                button.innerHTML = '<span style="font-size: 8pt; color: #00a000; white-space: nowrap;">Copied!</span>';
+                                button.style.padding = '4px 6px';
+                                setTimeout(() => {
+                                  button.innerHTML = originalHTML;
+                                  button.style.padding = '4px';
+                                }, 1500);
+                              }}
+                              title="Copy email"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )}
                 <tr>
                   <td>Notes</td>

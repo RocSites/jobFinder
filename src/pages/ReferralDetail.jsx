@@ -28,6 +28,7 @@ const ReferralDetail = () => {
   const [showLinkLeadModal, setShowLinkLeadModal] = useState(false);
   const [availableLeads, setAvailableLeads] = useState([]);
   const [selectedLeadId, setSelectedLeadId] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!isNewReferral) {
@@ -54,6 +55,8 @@ const ReferralDetail = () => {
           referralData.linkedLeads.map(leadId => api.userLeads.getById(leadId))
         );
         setLinkedLeads(leadsData.filter(Boolean));
+      } else {
+        setLinkedLeads([]); // Reset if no linked leads
       }
 
       // Fetch activity
@@ -157,12 +160,24 @@ const ReferralDetail = () => {
       const alreadyLinkedIds = new Set(referral?.linkedLeads || []);
       const available = userLeads.filter(lead => !alreadyLinkedIds.has(lead._id));
       setAvailableLeads(available);
+      setSearchQuery(''); // Reset search when opening modal
+      setSelectedLeadId(''); // Reset selection
       setShowLinkLeadModal(true);
     } catch (err) {
       console.error('Error fetching leads:', err);
       showToast(`Error loading leads: ${err.message}`, 'error');
     }
   };
+
+  // Filter available leads based on search query
+  const filteredLeads = availableLeads.filter((lead) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    const title = lead.leadId?.title?.toLowerCase() || '';
+    const company = lead.leadId?.company?.toLowerCase() || '';
+    const location = lead.leadId?.location?.toLowerCase() || '';
+    return title.includes(query) || company.includes(query) || location.includes(query);
+  });
 
   if (loading) {
     return (
@@ -300,7 +315,7 @@ const ReferralDetail = () => {
                             </a>
                           </div>
                           <div className="linked-lead-company">
-                            {lead.leadId?.company || 'Unknown Company'} • {lead.status || 'No status'}
+                            {lead.leadId?.company || 'Unknown Company'} • {lead.currentStatus || 'No status'}
                           </div>
                         </div>
                         <button
@@ -354,21 +369,47 @@ const ReferralDetail = () => {
               <button className="modal-close" onClick={() => setShowLinkLeadModal(false)}>×</button>
             </div>
             <div className="modal-body">
-              <p className="modal-instruction">Select a lead to link to this referral</p>
-              <label htmlFor="lead-select">Select Lead</label>
+              <p className="modal-instruction">Search and select a lead from your pipeline to link to this referral</p>
+
+              <label htmlFor="lead-search">Search Leads</label>
+              <input
+                id="lead-search"
+                type="text"
+                className="modal-input"
+                placeholder="Search by position, company, or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+
+              <label htmlFor="lead-select" style={{ marginTop: '12px', display: 'block' }}>
+                Select Lead ({filteredLeads.length} available)
+              </label>
               <select
                 id="lead-select"
                 className="modal-select"
                 value={selectedLeadId}
                 onChange={(e) => setSelectedLeadId(e.target.value)}
+                size="8"
               >
                 <option value="">-- Select a lead --</option>
-                {availableLeads.map((lead) => (
+                {filteredLeads.map((lead) => (
                   <option key={lead._id} value={lead._id}>
-                    {lead.leadId?.title || 'Unknown'} - {lead.leadId?.company || 'Unknown Company'}
+                    {lead.leadId?.title || 'Unknown'} - {lead.leadId?.company || 'Unknown Company'} - {lead.leadId?.location || 'N/A'}
                   </option>
                 ))}
               </select>
+
+              {filteredLeads.length === 0 && availableLeads.length > 0 && (
+                <p style={{ fontSize: '9pt', color: '#999999', marginTop: '8px', fontStyle: 'italic' }}>
+                  No leads match your search. Try a different query.
+                </p>
+              )}
+
+              {availableLeads.length === 0 && (
+                <p style={{ fontSize: '9pt', color: '#999999', marginTop: '8px', fontStyle: 'italic' }}>
+                  No available leads to link. All leads in your pipeline are already linked.
+                </p>
+              )}
             </div>
             <div className="modal-footer">
               <button className="btn" onClick={() => setShowLinkLeadModal(false)}>Cancel</button>

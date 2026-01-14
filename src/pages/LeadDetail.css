@@ -92,15 +92,21 @@
  }
 
  .back-link {
+     background: #cccccc;
+     color: #000000;
+     padding: 4px 8px;
      font-size: 9pt;
-     color: #ff6600;
+     border: 1px solid #cccccc;
+     cursor: pointer;
+     font-family: Verdana, Geneva, sans-serif;
+     margin-bottom: 8px;
      text-decoration: none;
      display: inline-block;
-     margin-bottom: 8px;
  }
 
  .back-link:hover {
-     text-decoration: underline;
+     background: #bbbbbb;
+     border-color: #bbbbbb;
  }
 
  .page-title {
@@ -510,8 +516,14 @@ body.dark-mode .add-note textarea::placeholder {
 }
 
 body.dark-mode .back-link {
-    background-color: #000000;
-    padding: 4px 8px;
+    background: #444444;
+    border-color: #444444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .back-link:hover {
+    background: #555555;
+    border-color: #555555;
 }
 
 /* Import Modal Styles */

@@ -252,6 +252,18 @@
     color: #666666;
 }
 
+.modal-input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 9pt;
+    font-family: Verdana, Geneva, sans-serif;
+    border: 1px solid #cccccc;
+    background: #ffffff;
+    color: #000000;
+    margin-top: 4px;
+    box-sizing: border-box;
+}
+
 .modal-select {
     width: 100%;
     padding: 4px 6px;
@@ -261,6 +273,11 @@
     background: #ffffff;
     color: #000000;
     margin-top: 4px;
+}
+
+.modal-select[size] {
+    height: auto;
+    min-height: 200px;
 }
 
 .modal-footer {
@@ -283,7 +300,8 @@ body.dark-mode .section-title {
 body.dark-mode .form-group input,
 body.dark-mode .form-group textarea,
 body.dark-mode .form-group select,
-body.dark-mode .modal-select {
+body.dark-mode .modal-select,
+body.dark-mode .modal-input {
     background: #2a2a2a;
     border-color: #444444;
     color: #e0e0e0;

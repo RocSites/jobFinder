@@ -168,6 +168,57 @@ body {
     font-family: monospace;
 }
 
+/* Referral info */
+.job-referral {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #e6e6df;
+    font-size: 8pt;
+}
+
+.referral-label {
+    color: #828282;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.referral-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.referral-name {
+    color: #000000;
+    font-weight: bold;
+}
+
+.referral-email {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #666666;
+}
+
+.copy-email-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    color: #828282;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-email-btn:hover {
+    color: #ff6600;
+}
+
+.copy-email-btn.copied {
+    color: #00a000;
+}
+
 .footer {
     text-align: center;
     padding: 12px;
@@ -332,6 +383,30 @@ body.dark-mode .job-meta {
 
 body.dark-mode .job-comp {
     color: #00cc00;
+}
+
+body.dark-mode .job-referral {
+    border-top-color: #404040;
+}
+
+body.dark-mode .referral-label {
+    color: #999;
+}
+
+body.dark-mode .referral-name {
+    color: #e0e0e0;
+}
+
+body.dark-mode .referral-email {
+    color: #999;
+}
+
+body.dark-mode .copy-email-btn {
+    color: #999;
+}
+
+body.dark-mode .copy-email-btn:hover {
+    color: #ff6600;
 }
 
 body.dark-mode .empty-state {

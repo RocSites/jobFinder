@@ -42,15 +42,48 @@ export const handler = async (event) => {
         return { statusCode: 200, body: JSON.stringify(activityData) };
       }
 
-      // single user-lead
+      // single user-lead with populated leadId
       if (id) {
-        const lead = await collection.findOne({ _id: new ObjectId(id) });
+        const leads = await collection.aggregate([
+          { $match: { _id: new ObjectId(id) } },
+          {
+            $lookup: {
+              from: 'leads',
+              localField: 'leadId',
+              foreignField: '_id',
+              as: 'leadId'
+            }
+          },
+          {
+            $unwind: {
+              path: '$leadId',
+              preserveNullAndEmptyArrays: true
+            }
+          }
+        ]).toArray();
+        const lead = leads.length > 0 ? leads[0] : null;
         return { statusCode: 200, body: JSON.stringify(lead) };
       }
 
-      // all leads
+      // all leads with populated leadId
       const query = userId ? { userId } : {};
-      const leads = await collection.find(query).toArray();
+      const leads = await collection.aggregate([
+        { $match: query },
+        {
+          $lookup: {
+            from: 'leads',
+            localField: 'leadId',
+            foreignField: '_id',
+            as: 'leadId'
+          }
+        },
+        {
+          $unwind: {
+            path: '$leadId',
+            preserveNullAndEmptyArrays: true
+          }
+        }
+      ]).toArray();
       return { statusCode: 200, body: JSON.stringify(leads) };
     }
 

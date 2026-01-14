@@ -34,6 +34,23 @@ export const handler = async () => {
         }
       },
       {
+        // Lookup referrals that have this userLead linked
+        $lookup: {
+          from: 'referrals',
+          let: { userLeadId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ['$$userLeadId', { $ifNull: ['$linkedLeads', []] }]
+                }
+              }
+            }
+          ],
+          as: 'referrals'
+        }
+      },
+      {
         // Add a field to separate userLead from leadDetails before grouping
         $addFields: {
           userLeadData: {
@@ -50,7 +67,8 @@ export const handler = async () => {
             updatedAt: '$updatedAt',
             appliedAt: '$appliedAt',
             interviewingAt: '$interviewingAt'
-          }
+          },
+          referral: { $arrayElemAt: ['$referrals', 0] } // Get first referral (should only be one)
         }
       },
       {
@@ -61,7 +79,8 @@ export const handler = async () => {
           leads: {
             $push: {
               userLead: '$userLeadData',
-              leadDetails: '$leadDetails'
+              leadDetails: '$leadDetails',
+              referral: '$referral'
             }
           }
         }

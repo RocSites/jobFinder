@@ -120,7 +120,7 @@ const Pipeline = () => {
                 {column.title} <span className="count">{count}</span>
               </div>
 
-              {leads.map(({ userLead, leadDetails }) => (
+              {leads.map(({ userLead, leadDetails, referral }) => (
                 <div
                   key={userLead._id}
                   className="job-card"
@@ -143,6 +143,42 @@ const Pipeline = () => {
                       </span>
                     )}
                   </div>
+
+                  {/* Referral info */}
+                  {referral && (
+                    <div className="job-referral" onClick={(e) => e.stopPropagation()}>
+                      <div className="referral-label">Referral:</div>
+                      <div className="referral-info">
+                        <span className="referral-name">{referral.name}</span>
+                        {referral.email && (
+                          <div className="referral-email">
+                            <span>{referral.email}</span>
+                            <button
+                              className="copy-email-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(referral.email);
+                                const button = e.currentTarget;
+                                const originalHTML = button.innerHTML;
+                                button.innerHTML = '✓';
+                                button.classList.add('copied');
+                                setTimeout(() => {
+                                  button.innerHTML = originalHTML;
+                                  button.classList.remove('copied');
+                                }, 1500);
+                              }}
+                              title="Copy email"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Status change buttons */}
                   <div className="card-actions" onClick={(e) => e.stopPropagation()}>
