@@ -357,7 +357,7 @@ const LeadDetail = () => {
           notes
         });
 
-        // Show toast confirmation
+        // Show toast confirmation  
         showToast('Changes saved!', 'success');
 
         fetchLeadDetails(); // Refresh to get latest data
@@ -809,7 +809,14 @@ const LeadDetail = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             navigator.clipboard.writeText(lead.contactEmail);
-                            showToast('Email copied!', 'success');
+                            const button = e.currentTarget;
+                            const originalHTML = button.innerHTML;
+                            button.innerHTML = '<span style="font-size: 8pt; color: #00a000; white-space: nowrap;">Copied!</span>';
+                            button.style.padding = '4px 6px';
+                            setTimeout(() => {
+                              button.innerHTML = originalHTML;
+                              button.style.padding = '4px';
+                            }, 1500);
                           }}
                           title="Copy email"
                         >
@@ -844,7 +851,14 @@ const LeadDetail = () => {
                             onClick={(e) => {
                               e.stopPropagation();
                               navigator.clipboard.writeText(email);
-                              showToast('Email copied!', 'success');
+                              const button = e.currentTarget;
+                              const originalHTML = button.innerHTML;
+                              button.innerHTML = '<span style="font-size: 8pt; color: #00a000; white-space: nowrap;">Copied!</span>';
+                              button.style.padding = '4px 6px';
+                              setTimeout(() => {
+                                button.innerHTML = originalHTML;
+                                button.style.padding = '4px';
+                              }, 1500);
                             }}
                             title="Copy email"
                           >
@@ -943,7 +957,14 @@ const LeadDetail = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigator.clipboard.writeText(referral.email);
-                                showToast('Email copied!', 'success');
+                                const button = e.currentTarget;
+                                const originalHTML = button.innerHTML;
+                                button.innerHTML = '<span style="font-size: 8pt; color: #00a000; white-space: nowrap;">Copied!</span>';
+                                button.style.padding = '4px 6px';
+                                setTimeout(() => {
+                                  button.innerHTML = originalHTML;
+                                  button.style.padding = '4px';
+                                }, 1500);
                               }}
                               title="Copy email"
                             >
