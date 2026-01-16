@@ -1,10 +1,28 @@
+import { supabase } from '../lib/supabase';
+
 const API_URL = import.meta.env.VITE_API_URL || '/.netlify/functions';
 
-// Helper function for API calls
+// Get auth token for API calls
+const getAuthHeaders = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      return { Authorization: `Bearer ${session.access_token}` };
+    }
+  } catch (err) {
+    console.warn('Could not get auth token:', err);
+  }
+  return {};
+};
+
+// Helper function for API calls with auth
 const fetchAPI = async (endpoint, options = {}) => {
+  const authHeaders = await getAuthHeaders();
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders,
       ...options.headers,
     },
     ...options,
@@ -61,29 +79,23 @@ export const userLeadsAPI = {
   },
 
   // Get pipeline view (grouped by status)
-  getPipeline: (userId = '') => {
-    const query = userId ? `?userId=${userId}` : '';
-    return fetchAPI(`/pipeline${query}`);
-  },
+  getPipeline: () => fetchAPI('/pipeline'),
 
   // Get single user lead by UserLead ID
-  getById: (id, userId = '') => {
+  getById: (id) => {
     const params = new URLSearchParams({ id });
-    if (userId) params.append('userId', userId);
     return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
-  // Get user lead by LEAD ID (not UserLead ID) - NEW!
-  getByLeadId: (leadId, userId = '') => {
+  // Get user lead by LEAD ID (not UserLead ID)
+  getByLeadId: (leadId) => {
     const params = new URLSearchParams({ leadId });
-    if (userId) params.append('userId', userId);
     return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
   // Get activity timeline for a lead
-  getActivity: (id, userId = '') => {
+  getActivity: (id) => {
     const params = new URLSearchParams({ id, activity: 'true' });
-    if (userId) params.append('userId', userId);
     return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
@@ -106,9 +118,8 @@ export const userLeadsAPI = {
   }),
 
   // Remove saved lead
-  remove: (id, userId = '') => {
+  remove: (id) => {
     const params = new URLSearchParams({ id });
-    if (userId) params.append('userId', userId);
     return fetchAPI(`/user-leads?${params.toString()}`, {
       method: 'DELETE',
     });

@@ -1,22 +1,29 @@
 // netlify/functions/pipeline.js
 import { MongoClient } from 'mongodb';
+import { requireAuth } from './utils/auth.js';
 
-let cachedClient;
 let cachedDb;
 
 const connectDB = async () => {
   if (cachedDb) return cachedDb;
   const client = new MongoClient(process.env.MONGODB_URI);
   await client.connect();
-  cachedClient = client;
   cachedDb = client.db(process.env.MONGODB_DB_NAME || 'nextgig2');
   return cachedDb;
 };
 
-export const handler = async () => {
+export const handler = async (event) => {
+  // Pipeline requires authentication - shows only user's saved leads
+  const { user, error } = await requireAuth(event);
+  if (error) return error;
+
   try {
     const db = await connectDB();
     const pipeline = await db.collection('userleads').aggregate([
+      {
+        // Filter by userId first
+        $match: { userId: user.id }
+      },
       {
         // Join with leads collection to get lead details
         $lookup: {
