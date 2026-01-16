@@ -37,6 +37,21 @@ const leadSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  additionalEmails: [{
+    type: String,
+    lowercase: true,
+    trim: true
+  }],
+  additionalLinks: [{
+    title: {
+      type: String,
+      trim: true
+    },
+    url: {
+      type: String,
+      trim: true
+    }
+  }],
   contactLinkedIn: {
     type: String,
     trim: true

@@ -35,6 +35,12 @@
     border: 1px solid #990000;
 }
 
+.toast-info {
+    background: #ff6600;
+    color: #ffffff;
+    border: 1px solid #cc5200;
+}
+
 /* Dark Mode Toast Styles */
 body.dark-mode .toast-success {
     background: #00a000;
@@ -46,4 +52,10 @@ body.dark-mode .toast-error {
     background: #cc0000;
     color: #ffffff;
     border: 1px solid #ff0000;
+}
+
+body.dark-mode .toast-info {
+    background: #ff6600;
+    color: #ffffff;
+    border: 1px solid #ff8833;
 }

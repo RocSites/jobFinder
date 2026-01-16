@@ -195,7 +195,7 @@
  .form-table input,
  .form-table select,
  .form-table textarea {
-     width: 50%;
+     width: 100%;
      padding: 4px;
      font-family: Verdana, Geneva, sans-serif;
      font-size: 9pt;
@@ -279,6 +279,41 @@
 
  .saved-lead-btn:hover {
      background: #e6ffe6 !important;
+ }
+
+ /* Additional Email buttons */
+ .btn-add-email {
+     background: none;
+     border: none;
+     color: #ff6600;
+     font-size: 9pt;
+     font-family: Verdana, Geneva, sans-serif;
+     cursor: pointer;
+     padding: 4px 0;
+ }
+
+ .btn-add-email:hover {
+     text-decoration: underline;
+ }
+
+ .btn-remove-email {
+     background: none;
+     border: 1px solid #cc0000;
+     color: #cc0000;
+     font-size: 14px;
+     font-weight: bold;
+     cursor: pointer;
+     width: 22px;
+     height: 22px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     padding: 0;
+     line-height: 1;
+ }
+
+ .btn-remove-email:hover {
+     background: #ffe6e6;
  }
 
  /* Activity section */
@@ -439,6 +474,10 @@ body.dark-mode .form-table textarea {
     background: #1a1a1a;
     border-color: #404040;
     color: #e0e0e0;
+}
+
+body.dark-mode .form-table a {
+    color: #ff6600;
 }
 
 body.dark-mode .status-badge {
@@ -684,6 +723,19 @@ body.dark-mode .btn-import:hover {
 
 body.dark-mode .page-title-row {
     color: #e0e0e0;
+}
+
+body.dark-mode .btn-add-email {
+    color: #ff6600;
+}
+
+body.dark-mode .btn-remove-email {
+    border-color: #ff6666;
+    color: #ff6666;
+}
+
+body.dark-mode .btn-remove-email:hover {
+    background: #3a1f1f;
 }
 
 /* Mobile Responsive - under 600px */

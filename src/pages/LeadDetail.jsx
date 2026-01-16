@@ -30,9 +30,6 @@ const LeadDetail = () => {
   const [isEditingBasic, setIsEditingBasic] = useState(false);
   const [isEditingContact, setIsEditingContact] = useState(false);
 
-  // Save button state
-  const [showSavedConfirmation, setShowSavedConfirmation] = useState(false);
-
   // Import modal state
   const [showImportModal, setShowImportModal] = useState(false);
   const [importUrl, setImportUrl] = useState('');
@@ -177,6 +174,8 @@ const LeadDetail = () => {
         datePosted: '',
         contactName: '',
         contactEmail: '',
+        additionalEmails: [],
+        additionalLinks: [],
         contactLinkedIn: '',
         sourceApplicationLink: '',
         sourceLink: ''
@@ -305,6 +304,8 @@ const LeadDetail = () => {
           datePosted: lead.datePosted || new Date(),
           contactName: lead.contactName,
           contactEmail: lead.contactEmail,
+          additionalEmails: lead.additionalEmails?.filter(e => e.trim()) || [],
+          additionalLinks: lead.additionalLinks?.filter(l => l.url?.trim()) || [],
           contactLinkedIn: lead.contactLinkedIn,
           sourceApplicationLink: lead.sourceApplicationLink,
           sourceLink: lead.sourceLink
@@ -338,6 +339,8 @@ const LeadDetail = () => {
             datePosted: lead.datePosted,
             contactName: lead.contactName,
             contactEmail: lead.contactEmail,
+            additionalEmails: lead.additionalEmails?.filter(e => e.trim()) || [],
+            additionalLinks: lead.additionalLinks?.filter(l => l.url?.trim()) || [],
             contactLinkedIn: lead.contactLinkedIn,
             sourceApplicationLink: lead.sourceApplicationLink,
             sourceLink: lead.sourceLink
@@ -354,13 +357,8 @@ const LeadDetail = () => {
           notes
         });
 
-        // Show "Saved" confirmation
-        setShowSavedConfirmation(true);
-
-        // Reset back to "Save Changes" after 1.5 seconds
-        setTimeout(() => {
-          setShowSavedConfirmation(false);
-        }, 1500);
+        // Show toast confirmation
+        showToast('Changes saved!', 'success');
 
         fetchLeadDetails(); // Refresh to get latest data
       } else {
@@ -453,6 +451,14 @@ const LeadDetail = () => {
       } catch (err) {
         showToast(`Error saving note: ${err.message}`, 'error');
       }
+    }
+  };
+
+  const handleReadOnlyClick = (section) => {
+    if (isNewLead) return; // New leads are always editable
+    const isEditing = section === 'basic' ? isEditingBasic : isEditingContact;
+    if (!isEditing && userLead) {
+      showToast('Click the edit button to make changes', 'info');
     }
   };
 
@@ -574,6 +580,7 @@ const LeadDetail = () => {
                       type="text"
                       value={lead.company}
                       onChange={(e) => setLead({ ...lead, company: e.target.value })}
+                      onClick={() => handleReadOnlyClick('basic')}
                       readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. Acme Corp" : ""}
                     />
@@ -586,6 +593,7 @@ const LeadDetail = () => {
                       type="text"
                       value={lead.title}
                       onChange={(e) => setLead({ ...lead, title: e.target.value })}
+                      onClick={() => handleReadOnlyClick('basic')}
                       readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. Senior Software Engineer" : ""}
                     />
@@ -598,6 +606,7 @@ const LeadDetail = () => {
                       type="text"
                       value={lead.location || ''}
                       onChange={(e) => setLead({ ...lead, location: e.target.value })}
+                      onClick={() => handleReadOnlyClick('basic')}
                       readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. San Francisco, CA or Remote" : ""}
                     />
@@ -610,6 +619,7 @@ const LeadDetail = () => {
                       type="text"
                       value={lead.team || ''}
                       onChange={(e) => setLead({ ...lead, team: e.target.value })}
+                      onClick={() => handleReadOnlyClick('basic')}
                       readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. Engineering" : ""}
                     />
@@ -622,6 +632,7 @@ const LeadDetail = () => {
                       type="text"
                       value={lead.compensation?.raw || ''}
                       onChange={(e) => setLead({ ...lead, compensation: { raw: e.target.value } })}
+                      onClick={() => handleReadOnlyClick('basic')}
                       className="comp-value"
                       readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. $120k - $180k" : ""}
@@ -645,6 +656,7 @@ const LeadDetail = () => {
                       type="text"
                       value={lead.industry || ''}
                       onChange={(e) => setLead({ ...lead, industry: e.target.value })}
+                      onClick={() => handleReadOnlyClick('basic')}
                       readOnly={!isNewLead && !isEditingBasic}
                       placeholder={isNewLead ? "e.g. Technology, Finance" : ""}
                     />
@@ -657,6 +669,7 @@ const LeadDetail = () => {
                       type={(isNewLead || isEditingBasic) ? "date" : "text"}
                       value={(isNewLead || isEditingBasic) ? (lead.datePosted || '') : (lead.datePosted ? new Date(lead.datePosted).toLocaleDateString() : 'N/A')}
                       onChange={(e) => setLead({ ...lead, datePosted: e.target.value })}
+                      onClick={() => handleReadOnlyClick('basic')}
                       readOnly={!isNewLead && !isEditingBasic}
                     />
                   </td>
@@ -779,6 +792,7 @@ const LeadDetail = () => {
                       type="text"
                       value={lead.contactName || ''}
                       onChange={(e) => setLead({ ...lead, contactName: e.target.value })}
+                      onClick={() => handleReadOnlyClick('contact')}
                       readOnly={!isNewLead && !isEditingContact}
                       placeholder={isNewLead ? "e.g. Jane Doe" : ""}
                     />
@@ -788,18 +802,107 @@ const LeadDetail = () => {
                   <td>Email</td>
                   <td>
                     {!isNewLead && !isEditingContact && lead.contactEmail ? (
-                      <a href={`mailto:${lead.contactEmail}`}>{lead.contactEmail}</a>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <a href={`mailto:${lead.contactEmail}`}>{lead.contactEmail}</a>
+                        <button
+                          className="copy-icon-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(lead.contactEmail);
+                            showToast('Email copied!', 'success');
+                          }}
+                          title="Copy email"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                          </svg>
+                        </button>
+                      </div>
                     ) : (
                       <input
                         type="email"
                         value={lead.contactEmail || ''}
                         onChange={(e) => setLead({ ...lead, contactEmail: e.target.value })}
+                        onClick={() => handleReadOnlyClick('contact')}
                         readOnly={!isNewLead && !isEditingContact}
                         placeholder={isNewLead ? "email@example.com" : ""}
                       />
                     )}
                   </td>
                 </tr>
+                {/* Additional Emails */}
+                {(lead.additionalEmails || []).map((email, index) => (
+                  <tr key={`additional-email-${index}`}>
+                    <td>{index === 0 ? 'Additional Email' : ''}</td>
+                    <td>
+                      {!isNewLead && !isEditingContact ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <a href={`mailto:${email}`}>{email}</a>
+                          <button
+                            className="copy-icon-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(email);
+                              showToast('Email copied!', 'success');
+                            }}
+                            title="Copy email"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => {
+                              const newEmails = [...(lead.additionalEmails || [])];
+                              newEmails[index] = e.target.value;
+                              setLead({ ...lead, additionalEmails: newEmails });
+                            }}
+                            placeholder="email@example.com"
+                            style={{ flex: 1 }}
+                          />
+                          <button
+                            type="button"
+                            className="btn-remove-email"
+                            onClick={() => {
+                              const newEmails = (lead.additionalEmails || []).filter((_, i) => i !== index);
+                              setLead({ ...lead, additionalEmails: newEmails });
+                            }}
+                            title="Remove email"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {(isNewLead || userLead) && (
+                  <tr>
+                    <td></td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn-add-email"
+                        onClick={() => {
+                          if (!isNewLead && !isEditingContact) {
+                            setIsEditingContact(true);
+                          }
+                          const newEmails = [...(lead.additionalEmails || []), ''];
+                          setLead({ ...lead, additionalEmails: newEmails });
+                        }}
+                      >
+                        + Add another email
+                      </button>
+                    </td>
+                  </tr>
+                )}
                 {(isNewLead || isEditingContact || lead.contactLinkedIn) && (
                   <tr>
                     <td>LinkedIn</td>
@@ -840,14 +943,7 @@ const LeadDetail = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigator.clipboard.writeText(referral.email);
-                                const button = e.currentTarget;
-                                const originalHTML = button.innerHTML;
-                                button.innerHTML = '<span style="font-size: 8pt; color: #00a000; white-space: nowrap;">Copied!</span>';
-                                button.style.padding = '4px 6px';
-                                setTimeout(() => {
-                                  button.innerHTML = originalHTML;
-                                  button.style.padding = '4px';
-                                }, 1500);
+                                showToast('Email copied!', 'success');
                               }}
                               title="Copy email"
                             >
@@ -870,6 +966,80 @@ const LeadDetail = () => {
                         onClick={() => navigate('/referrals/new', { state: { linkLeadId: userLead._id, leadTitle: lead?.title, leadCompany: lead?.company } })}
                       >
                         + Add Referral
+                      </button>
+                    </td>
+                  </tr>
+                )}
+                {/* Additional Links */}
+                {(lead.additionalLinks || []).map((link, index) => (
+                  <tr key={`additional-link-${index}`}>
+                    <td>{index === 0 ? 'Links' : ''}</td>
+                    <td>
+                      {!isNewLead && !isEditingContact ? (
+                        <div>
+                          {link.title && <span style={{ fontSize: '8pt', color: '#828282', display: 'block', marginBottom: '2px' }}>{link.title}</span>}
+                          <a href={link.url} target="_blank" rel="noopener noreferrer">
+                            {link.url?.length > 50 ? link.url.substring(0, 50) + '...' : link.url}
+                          </a>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-start' }}>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <input
+                              type="text"
+                              value={link.title || ''}
+                              onChange={(e) => {
+                                const newLinks = [...(lead.additionalLinks || [])];
+                                newLinks[index] = { ...newLinks[index], title: e.target.value };
+                                setLead({ ...lead, additionalLinks: newLinks });
+                              }}
+                              placeholder="Title (optional)"
+                              style={{ fontSize: '8pt' }}
+                            />
+                            <input
+                              type="url"
+                              value={link.url || ''}
+                              onChange={(e) => {
+                                const newLinks = [...(lead.additionalLinks || [])];
+                                newLinks[index] = { ...newLinks[index], url: e.target.value };
+                                setLead({ ...lead, additionalLinks: newLinks });
+                              }}
+                              placeholder="https://..."
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            className="btn-remove-email"
+                            onClick={() => {
+                              const newLinks = (lead.additionalLinks || []).filter((_, i) => i !== index);
+                              setLead({ ...lead, additionalLinks: newLinks });
+                            }}
+                            title="Remove link"
+                            style={{ marginTop: '4px' }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {(isNewLead || userLead) && (
+                  <tr>
+                    <td>{(lead.additionalLinks || []).length === 0 ? 'Links' : ''}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn-add-email"
+                        onClick={() => {
+                          if (!isNewLead && !isEditingContact) {
+                            setIsEditingContact(true);
+                          }
+                          const newLinks = [...(lead.additionalLinks || []), { title: '', url: '' }];
+                          setLead({ ...lead, additionalLinks: newLinks });
+                        }}
+                      >
+                        {(lead.additionalLinks || []).length === 0 ? '+ Add link' : '+ Add another link'}
                       </button>
                     </td>
                   </tr>
@@ -902,11 +1072,10 @@ const LeadDetail = () => {
 
           <div className="actions">
             <button
-              className={`btn ${showSavedConfirmation ? 'btn-saved' : 'btn-primary'}`}
+              className="btn btn-primary"
               onClick={handleSave}
-              disabled={showSavedConfirmation}
             >
-              {showSavedConfirmation ? 'Saved' : (isNewLead ? 'Add Lead' : userLead ? 'Save Changes' : 'Save Lead to Pipeline')}
+              {isNewLead ? 'Add Lead' : userLead ? 'Save Changes' : 'Save Lead to Pipeline'}
             </button>
             <button className="btn btn-danger" onClick={handleDelete}>
               {userLead ? 'Remove from Pipeline' : 'Back'}
