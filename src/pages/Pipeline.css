@@ -97,7 +97,7 @@ body {
 .pipeline-col {
     display: table-cell;
     vertical-align: top;
-    width: 25%;
+    width: 20%;
 }
 
 .col-header {
@@ -282,6 +282,33 @@ body {
 .btn-sm.btn-secondary:hover {
     background: #f6f6ef;
     color: #000000;
+}
+
+.btn-sm.btn-danger {
+    background: #ffffff;
+    color: #cc0000;
+    border-color: #cc0000;
+}
+
+.btn-sm.btn-danger:hover {
+    background: #ffe6e6;
+}
+
+.btn-sm.btn-success {
+    background: #00a000;
+    color: #ffffff;
+    border-color: #00a000;
+}
+
+.btn-sm.btn-success:hover {
+    background: #008000;
+}
+
+.accepted-label {
+    font-size: 8pt;
+    color: #00a000;
+    font-weight: bold;
+    font-style: italic;
 }
 
 .empty-state {

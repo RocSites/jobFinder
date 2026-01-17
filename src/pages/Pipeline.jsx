@@ -6,6 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 import './Pipeline.css';
 import api from '../api/client';
 import { useToast } from '../hooks/useToast.jsx';
+import PublishLeadModal from '../components/PublishLeadModal';
 
 const Pipeline = () => {
   const location = useLocation();
@@ -19,6 +20,13 @@ const Pipeline = () => {
     interviewing: 0,
     offers: 0
   });
+
+  // Publish modal state
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [publishMode, setPublishMode] = useState(null);
+  const [pendingUserLeadId, setPendingUserLeadId] = useState(null);
+  const [pendingLeadDetails, setPendingLeadDetails] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   // Re-fetch pipeline on mount and when location changes
   useEffect(() => {
@@ -47,7 +55,16 @@ const Pipeline = () => {
     }
   };
 
-  const handleStatusChange = async (userLeadId, newStatus) => {
+  const handleStatusChange = async (userLeadId, newStatus, leadDetails = null) => {
+    // Check if this status change should trigger a publish modal
+    if (newStatus === 'rejected' || newStatus === 'offer_accepted') {
+      setPendingUserLeadId(userLeadId);
+      setPendingLeadDetails(leadDetails);
+      setPublishMode(newStatus);
+      setShowPublishModal(true);
+      return;
+    }
+
     try {
       await api.userLeads.updateStatus(userLeadId, newStatus);
       // Refresh pipeline
@@ -55,6 +72,49 @@ const Pipeline = () => {
     } catch (err) {
       showToast(`Error updating status: ${err.message}`, 'error');
     }
+  };
+
+  const handlePublishConfirm = async () => {
+    setIsPublishing(true);
+    try {
+      // First update the status
+      await api.userLeads.updateStatus(pendingUserLeadId, publishMode);
+
+      // Then publish based on mode
+      if (publishMode === 'rejected' && pendingLeadDetails) {
+        await api.publish.publishSingle(pendingLeadDetails._id);
+        showToast('Lead published to public database!', 'success');
+      } else if (publishMode === 'offer_accepted') {
+        const result = await api.publish.publishAll();
+        showToast(`${result.count} lead(s) published to public database!`, 'success');
+      }
+
+      // Refresh and close modal
+      fetchPipeline();
+      setShowPublishModal(false);
+      setPendingUserLeadId(null);
+      setPendingLeadDetails(null);
+      setPublishMode(null);
+    } catch (err) {
+      showToast(`Error: ${err.message}`, 'error');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handlePublishDecline = async () => {
+    // User declined to publish, but still update the status
+    try {
+      await api.userLeads.updateStatus(pendingUserLeadId, publishMode);
+      fetchPipeline();
+      showToast('Status updated', 'success');
+    } catch (err) {
+      showToast(`Error updating status: ${err.message}`, 'error');
+    }
+    setShowPublishModal(false);
+    setPendingUserLeadId(null);
+    setPendingLeadDetails(null);
+    setPublishMode(null);
   };
 
   // Helper to get leads for a specific status (sorted by priority)
@@ -76,7 +136,8 @@ const Pipeline = () => {
     { id: 'saved', title: 'Saved' },
     { id: 'applied', title: 'Applied' },
     { id: 'interviewing', title: 'Interviewing' },
-    { id: 'offer', title: 'Offer' }
+    { id: 'offer', title: 'Offer' },
+    { id: 'offer_accepted', title: 'Accepted' }
   ];
 
   if (loading) {
@@ -183,12 +244,21 @@ const Pipeline = () => {
                   {/* Status change buttons */}
                   <div className="card-actions" onClick={(e) => e.stopPropagation()}>
                     {column.id === 'saved' && (
-                      <button
-                        className="btn-sm"
-                        onClick={() => handleStatusChange(userLead._id, 'applied')}
-                      >
-                        Mark Applied →
-                      </button>
+                      <>
+                        <button
+                          className="btn-sm"
+                          onClick={() => handleStatusChange(userLead._id, 'applied')}
+                        >
+                          Mark Applied →
+                        </button>
+                        <button
+                          className="btn-sm btn-danger"
+                          onClick={() => handleStatusChange(userLead._id, 'rejected', leadDetails)}
+                          title="Mark as Rejected"
+                        >
+                          Rejected
+                        </button>
+                      </>
                     )}
                     {column.id === 'applied' && (
                       <>
@@ -204,6 +274,13 @@ const Pipeline = () => {
                           onClick={() => handleStatusChange(userLead._id, 'interviewing')}
                         >
                           Interview →
+                        </button>
+                        <button
+                          className="btn-sm btn-danger"
+                          onClick={() => handleStatusChange(userLead._id, 'rejected', leadDetails)}
+                          title="Mark as Rejected"
+                        >
+                          Rejected
                         </button>
                       </>
                     )}
@@ -222,16 +299,41 @@ const Pipeline = () => {
                         >
                           Got Offer! →
                         </button>
+                        <button
+                          className="btn-sm btn-danger"
+                          onClick={() => handleStatusChange(userLead._id, 'rejected', leadDetails)}
+                          title="Mark as Rejected"
+                        >
+                          Rejected
+                        </button>
                       </>
                     )}
                     {column.id === 'offer' && (
-                      <button
-                        className="btn-sm btn-secondary"
-                        onClick={() => handleStatusChange(userLead._id, 'interviewing')}
-                        title="Move back to Interviewing"
-                      >
-                        ← Back
-                      </button>
+                      <>
+                        <button
+                          className="btn-sm btn-secondary"
+                          onClick={() => handleStatusChange(userLead._id, 'interviewing')}
+                          title="Move back to Interviewing"
+                        >
+                          ← Back
+                        </button>
+                        <button
+                          className="btn-sm btn-success"
+                          onClick={() => handleStatusChange(userLead._id, 'offer_accepted', leadDetails)}
+                        >
+                          Accept Offer!
+                        </button>
+                        <button
+                          className="btn-sm btn-danger"
+                          onClick={() => handleStatusChange(userLead._id, 'rejected', leadDetails)}
+                          title="Mark as Rejected"
+                        >
+                          Rejected
+                        </button>
+                      </>
+                    )}
+                    {column.id === 'offer_accepted' && (
+                      <span className="accepted-label">Congratulations!</span>
                     )}
                   </div>
                 </div>
@@ -247,6 +349,17 @@ const Pipeline = () => {
         })}
       </div>
       <ToastComponent />
+
+      {/* Publish Lead Modal */}
+      <PublishLeadModal
+        isOpen={showPublishModal}
+        onClose={handlePublishDecline}
+        onConfirm={handlePublishConfirm}
+        mode={publishMode}
+        leadTitle={pendingLeadDetails?.title}
+        leadCompany={pendingLeadDetails?.company}
+        isLoading={isPublishing}
+      />
     </div>
   );
 };

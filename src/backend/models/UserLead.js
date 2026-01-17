@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const statusHistorySchema = new mongoose.Schema({
   status: {
     type: String,
-    enum: ['saved', 'applied', 'interviewing', 'offer', 'rejected', 'archived'],
+    enum: ['saved', 'applied', 'interviewing', 'offer', 'offer_accepted', 'rejected', 'archived'],
     required: true
   },
   timestamp: {
@@ -29,7 +29,7 @@ const userLeadSchema = new mongoose.Schema({
   },
   currentStatus: {
     type: String,
-    enum: ['saved', 'applied', 'interviewing', 'offer', 'rejected', 'archived'],
+    enum: ['saved', 'applied', 'interviewing', 'offer', 'offer_accepted', 'rejected', 'archived'],
     default: 'saved'
   },
   statusHistory: [statusHistorySchema],
@@ -54,6 +54,7 @@ const userLeadSchema = new mongoose.Schema({
   appliedAt: Date,
   interviewingAt: Date,
   offerAt: Date,
+  offerAcceptedAt: Date,
   // Metadata
   lastActivityAt: {
     type: Date,

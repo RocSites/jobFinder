@@ -70,6 +70,21 @@ export const leadsAPI = {
   }),
 };
 
+// Publish Leads API
+export const publishLeadsAPI = {
+  // Publish a single lead to public database
+  publishSingle: (leadId) => fetchAPI('/publish-leads', {
+    method: 'POST',
+    body: JSON.stringify({ mode: 'single', leadId }),
+  }),
+
+  // Publish all user's leads to public database
+  publishAll: () => fetchAPI('/publish-leads', {
+    method: 'POST',
+    body: JSON.stringify({ mode: 'all' }),
+  }),
+};
+
 // User Leads API (Saved/Tracked Leads)
 export const userLeadsAPI = {
   // Get all user's saved leads
@@ -166,6 +181,7 @@ export const api = {
   leads: leadsAPI,
   userLeads: userLeadsAPI,
   referrals: referralsAPI,
+  publish: publishLeadsAPI,
 };
 
 export default api;

@@ -159,6 +159,10 @@ export const handler = async (event) => {
           updateDoc.appliedAt = new Date().toISOString();
         } else if (data.status === 'interviewing' && !existing.interviewingAt) {
           updateDoc.interviewingAt = new Date().toISOString();
+        } else if (data.status === 'offer' && !existing.offerAt) {
+          updateDoc.offerAt = new Date().toISOString();
+        } else if (data.status === 'offer_accepted' && !existing.offerAcceptedAt) {
+          updateDoc.offerAcceptedAt = new Date().toISOString();
         }
 
         // Add to status history
