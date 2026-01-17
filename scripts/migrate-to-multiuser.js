@@ -30,7 +30,7 @@ const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'nextgig2';
 async function migrate(newUserId) {
   if (!newUserId) {
     console.error('Error: Please provide a Supabase user ID');
-    console.log('Usage: node scripts/migrate-to-multiuser.js <supabase-user-id>');
+    console.log('Usage: node scripts/migrate-to-multiuser.js 55f3eb77-1c1f-4388-9e89-b86c52946bb1');
     console.log('\nTo get your Supabase user ID:');
     console.log('1. Log in to your Supabase dashboard');
     console.log('2. Go to Authentication > Users');

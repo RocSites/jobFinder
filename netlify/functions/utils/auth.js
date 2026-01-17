@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Create Supabase client for server-side validation
 const getSupabaseClient = () => {
@@ -18,7 +18,7 @@ const getSupabaseClient = () => {
  * @param {string} authHeader - The Authorization header value
  * @returns {Object|null} - User object with id, email, role or null if invalid
  */
-const verifyToken = async (authHeader) => {
+export const verifyToken = async (authHeader) => {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
@@ -66,7 +66,7 @@ const verifyToken = async (authHeader) => {
  * @param {Object} event - Netlify function event
  * @returns {Object} - { user: Object|null, error: Object|null }
  */
-const requireAuth = async (event) => {
+export const requireAuth = async (event) => {
   const authHeader = event.headers.authorization || event.headers.Authorization;
   const user = await verifyToken(authHeader);
 
@@ -88,7 +88,7 @@ const requireAuth = async (event) => {
  * @param {Object} event - Netlify function event
  * @returns {Object|null} - User object or null
  */
-const optionalAuth = async (event) => {
+export const optionalAuth = async (event) => {
   const authHeader = event.headers.authorization || event.headers.Authorization;
   return await verifyToken(authHeader);
 };
@@ -98,14 +98,8 @@ const optionalAuth = async (event) => {
  * @param {Object} user - User object from verifyToken
  * @returns {boolean}
  */
-const isAdmin = (user) => {
+export const isAdmin = (user) => {
   return user?.role === 'admin';
 };
 
-module.exports = {
-  verifyToken,
-  requireAuth,
-  optionalAuth,
-  isAdmin,
-  getSupabaseClient
-};
+export { getSupabaseClient };

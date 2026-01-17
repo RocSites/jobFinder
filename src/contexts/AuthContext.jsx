@@ -31,15 +31,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const profile = await fetchUserProfile(session.user.id);
-        setUserProfile(profile);
+    let isMounted = true;
+
+    // Timeout fallback - if getSession takes too long, stop loading
+    const timeout = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('Auth session check timed out');
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    }, 5000);
+
+    // Get initial session
+    supabase.auth.getSession()
+      .then(async ({ data: { session } }) => {
+        if (!isMounted) return;
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          const profile = await fetchUserProfile(session.user.id);
+          if (isMounted) setUserProfile(profile);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error getting session:', err);
+        if (isMounted) setLoading(false);
+      });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -54,7 +70,11 @@ export const AuthProvider = ({ children }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Validate invite code
