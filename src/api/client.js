@@ -1,10 +1,29 @@
 const API_URL = import.meta.env.VITE_API_URL || '/.netlify/functions';
 
-// Helper function for API calls
+// Store access token at module level - set by AuthContext
+let cachedAccessToken = null;
+
+// Function to update the cached token (called from AuthContext)
+export const setAccessToken = (token) => {
+  cachedAccessToken = token;
+};
+
+// Get auth headers using cached token
+const getAuthHeaders = () => {
+  if (cachedAccessToken) {
+    return { Authorization: `Bearer ${cachedAccessToken}` };
+  }
+  return {};
+};
+
+// Helper function for API calls with auth
 const fetchAPI = async (endpoint, options = {}) => {
+  const authHeaders = getAuthHeaders();
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders,
       ...options.headers,
     },
     ...options,
@@ -52,6 +71,21 @@ export const leadsAPI = {
   }),
 };
 
+// Publish Leads API
+export const publishLeadsAPI = {
+  // Publish a single lead to public database
+  publishSingle: (leadId) => fetchAPI('/publish-leads', {
+    method: 'POST',
+    body: JSON.stringify({ mode: 'single', leadId }),
+  }),
+
+  // Publish all user's leads to public database
+  publishAll: () => fetchAPI('/publish-leads', {
+    method: 'POST',
+    body: JSON.stringify({ mode: 'all' }),
+  }),
+};
+
 // User Leads API (Saved/Tracked Leads)
 export const userLeadsAPI = {
   // Get all user's saved leads
@@ -61,29 +95,23 @@ export const userLeadsAPI = {
   },
 
   // Get pipeline view (grouped by status)
-  getPipeline: (userId = '') => {
-    const query = userId ? `?userId=${userId}` : '';
-    return fetchAPI(`/pipeline${query}`);
-  },
+  getPipeline: () => fetchAPI('/pipeline'),
 
   // Get single user lead by UserLead ID
-  getById: (id, userId = '') => {
+  getById: (id) => {
     const params = new URLSearchParams({ id });
-    if (userId) params.append('userId', userId);
     return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
-  // Get user lead by LEAD ID (not UserLead ID) - NEW!
-  getByLeadId: (leadId, userId = '') => {
+  // Get user lead by LEAD ID (not UserLead ID)
+  getByLeadId: (leadId) => {
     const params = new URLSearchParams({ leadId });
-    if (userId) params.append('userId', userId);
     return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
   // Get activity timeline for a lead
-  getActivity: (id, userId = '') => {
+  getActivity: (id) => {
     const params = new URLSearchParams({ id, activity: 'true' });
-    if (userId) params.append('userId', userId);
     return fetchAPI(`/user-leads?${params.toString()}`);
   },
 
@@ -106,9 +134,8 @@ export const userLeadsAPI = {
   }),
 
   // Remove saved lead
-  remove: (id, userId = '') => {
+  remove: (id) => {
     const params = new URLSearchParams({ id });
-    if (userId) params.append('userId', userId);
     return fetchAPI(`/user-leads?${params.toString()}`, {
       method: 'DELETE',
     });
@@ -155,6 +182,7 @@ export const api = {
   leads: leadsAPI,
   userLeads: userLeadsAPI,
   referrals: referralsAPI,
+  publish: publishLeadsAPI,
 };
 
 export default api;

@@ -70,6 +70,17 @@ const leadSchema = new mongoose.Schema({
   industry: {
     type: String,
     trim: true
+  },
+  // Auth fields
+  createdBy: {
+    type: String,  // Supabase user ID or 'system' for imported leads
+    default: 'system',
+    index: true
+  },
+  isGlobal: {
+    type: Boolean,
+    default: false,  // true = visible to all users (admin-created leads)
+    index: true
   }
 }, {
   timestamps: true

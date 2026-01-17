@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useToast } from '../hooks/useToast.jsx';
+import PublishLeadModal from '../components/PublishLeadModal';
 import './LeadDetail.css';
 
 const LeadDetail = () => {
@@ -33,6 +34,12 @@ const LeadDetail = () => {
   // Import modal state
   const [showImportModal, setShowImportModal] = useState(false);
   const [importUrl, setImportUrl] = useState('');
+
+  // Publish lead modal state
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [publishMode, setPublishMode] = useState(null); // 'rejected' or 'offer_accepted'
+  const [pendingStatus, setPendingStatus] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   // Track initial values to detect changes
   const [initialValues, setInitialValues] = useState(null);
@@ -385,6 +392,16 @@ const LeadDetail = () => {
       return;
     }
 
+    // Check if this status change should trigger a publish modal
+    if (newStatus === 'rejected' || newStatus === 'offer_accepted') {
+      setPendingStatus(newStatus);
+      setPublishMode(newStatus);
+      setShowPublishModal(true);
+      // Don't update status yet - wait for modal response
+      e.target.value = status; // Reset dropdown temporarily
+      return;
+    }
+
     try {
       // Optimistically update UI
       setStatus(newStatus);
@@ -400,6 +417,51 @@ const LeadDetail = () => {
       setStatus(status);
       e.target.value = status; // Reset dropdown on error
     }
+  };
+
+  const handlePublishConfirm = async () => {
+    setIsPublishing(true);
+    try {
+      // First update the status
+      await api.userLeads.updateStatus(userLead._id, pendingStatus);
+      setStatus(pendingStatus);
+
+      // Then publish based on mode
+      if (publishMode === 'rejected') {
+        // Publish single lead
+        await api.publish.publishSingle(lead._id);
+        showToast('Lead published to public database!', 'success');
+      } else if (publishMode === 'offer_accepted') {
+        // Publish all leads
+        const result = await api.publish.publishAll();
+        showToast(`${result.count} lead(s) published to public database!`, 'success');
+      }
+
+      // Refresh and close modal
+      await fetchLeadDetails();
+      setShowPublishModal(false);
+      setPendingStatus(null);
+      setPublishMode(null);
+    } catch (err) {
+      showToast(`Error: ${err.message}`, 'error');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handlePublishDecline = async () => {
+    // User declined to publish, but still update the status
+    try {
+      await api.userLeads.updateStatus(userLead._id, pendingStatus);
+      setStatus(pendingStatus);
+      await fetchLeadDetails();
+      showToast('Status updated', 'success');
+    } catch (err) {
+      showToast(`Error updating status: ${err.message}`, 'error');
+    }
+    setShowPublishModal(false);
+    setPendingStatus(null);
+    setPublishMode(null);
   };
 
   const handlePriorityChange = async (e) => {
@@ -721,6 +783,7 @@ const LeadDetail = () => {
                       <option value="applied">Applied</option>
                       <option value="interviewing">Interviewing</option>
                       <option value="offer">Offer</option>
+                      <option value="offer_accepted">Offer Accepted</option>
                       <option value="rejected">Rejected</option>
                       <option value="archived">Archived</option>
                     </select>
@@ -1137,6 +1200,17 @@ const LeadDetail = () => {
       </div>
 
       <ToastComponent />
+
+      {/* Publish Lead Modal */}
+      <PublishLeadModal
+        isOpen={showPublishModal}
+        onClose={handlePublishDecline}
+        onConfirm={handlePublishConfirm}
+        mode={publishMode}
+        leadTitle={lead?.title}
+        leadCompany={lead?.company}
+        isLoading={isPublishing}
+      />
     </div>
   );
 };

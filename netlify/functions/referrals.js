@@ -1,47 +1,51 @@
 // netlify/functions/referrals.js
 import { MongoClient, ObjectId } from 'mongodb';
+import { requireAuth } from './utils/auth.js';
 
-let cachedClient;
 let cachedDb;
 
 const connectDB = async () => {
   if (cachedDb) return cachedDb;
   const client = new MongoClient(process.env.MONGODB_URI);
   await client.connect();
-  cachedClient = client;
   cachedDb = client.db(process.env.MONGODB_DB_NAME || 'nextgig2');
   return cachedDb;
 };
 
 export const handler = async (event) => {
+  // All referral operations require authentication
+  const { user, error } = await requireAuth(event);
+  if (error) return error;
+
   const db = await connectDB();
   const collection = db.collection('referrals');
 
   try {
     const { id, activity } = event.queryStringParameters || {};
 
-    // GET requests
+    // GET requests - only user's own referrals
     if (event.httpMethod === 'GET') {
       // /referrals/:id/activity
       if (activity === 'true' && id) {
-        const referral = await collection.findOne({ _id: new ObjectId(id) });
-        // For now, activity will be based on notes updates
-        // You can expand this later to track more detailed activity
+        const referral = await collection.findOne({ _id: new ObjectId(id), userId: user.id });
+        if (!referral) {
+          return { statusCode: 404, body: JSON.stringify({ message: 'Referral not found' }) };
+        }
         const activityData = referral?.activityHistory || [];
         return { statusCode: 200, body: JSON.stringify(activityData) };
       }
 
-      // single referral by ID
+      // single referral by ID - must belong to user
       if (id) {
-        const referral = await collection.findOne({ _id: new ObjectId(id) });
+        const referral = await collection.findOne({ _id: new ObjectId(id), userId: user.id });
         if (!referral) {
           return { statusCode: 404, body: JSON.stringify({ message: 'Referral not found' }) };
         }
         return { statusCode: 200, body: JSON.stringify(referral) };
       }
 
-      // all referrals
-      const referrals = await collection.find({}).sort({ createdAt: -1 }).toArray();
+      // all referrals - only user's own
+      const referrals = await collection.find({ userId: user.id }).sort({ createdAt: -1 }).toArray();
       return { statusCode: 200, body: JSON.stringify(referrals) };
     }
 
@@ -50,6 +54,7 @@ export const handler = async (event) => {
       const data = JSON.parse(event.body);
 
       const newReferral = {
+        userId: user.id, // Associate referral with user
         name: data.name,
         company: data.company || '',
         email: data.email || '',
@@ -73,14 +78,14 @@ export const handler = async (event) => {
       return { statusCode: 201, body: JSON.stringify(createdReferral) };
     }
 
-    // PUT - Update referral
+    // PUT - Update referral (must belong to user)
     if (event.httpMethod === 'PUT') {
       if (!id) {
         return { statusCode: 400, body: JSON.stringify({ message: 'Referral ID required' }) };
       }
 
       const data = JSON.parse(event.body);
-      const existingReferral = await collection.findOne({ _id: new ObjectId(id) });
+      const existingReferral = await collection.findOne({ _id: new ObjectId(id), userId: user.id });
 
       if (!existingReferral) {
         return { statusCode: 404, body: JSON.stringify({ message: 'Referral not found' }) };
@@ -120,13 +125,13 @@ export const handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify(updatedReferral) };
     }
 
-    // DELETE - Remove referral
+    // DELETE - Remove referral (must belong to user)
     if (event.httpMethod === 'DELETE') {
       if (!id) {
         return { statusCode: 400, body: JSON.stringify({ message: 'Referral ID required' }) };
       }
 
-      const result = await collection.deleteOne({ _id: new ObjectId(id) });
+      const result = await collection.deleteOne({ _id: new ObjectId(id), userId: user.id });
 
       if (result.deletedCount === 0) {
         return { statusCode: 404, body: JSON.stringify({ message: 'Referral not found' }) };

@@ -1,5 +1,6 @@
 // netlify/functions/user-leads.js
 import { MongoClient, ObjectId } from 'mongodb';
+import { requireAuth } from './utils/auth.js';
 
 let cachedClient;
 let cachedDb;
@@ -14,25 +15,33 @@ const connectDB = async () => {
 };
 
 export const handler = async (event) => {
+  // All user-leads operations require authentication
+  const { user, error } = await requireAuth(event);
+  if (error) return error;
+
   const db = await connectDB();
   const collection = db.collection('userleads');
 
   try {
-    const { id, userId, leadId, activity } = event.queryStringParameters || {};
+    const { id, leadId, activity } = event.queryStringParameters || {};
+    const userId = user.id; // Use authenticated user's ID
 
     // GET requests
     if (event.httpMethod === 'GET') {
       // /user-leads/by-lead
       if (leadId) {
-        const query = { leadId: new ObjectId(leadId) };
-        if (userId) query.userId = userId;
+        const query = { leadId: new ObjectId(leadId), userId };
         const userLead = await collection.findOne(query);
         return { statusCode: 200, body: JSON.stringify(userLead) };
       }
 
       // /user-leads/:id/activity
       if (activity === 'true' && id) {
-        const lead = await collection.findOne({ _id: new ObjectId(id) });
+        // Verify user owns this lead
+        const lead = await collection.findOne({ _id: new ObjectId(id), userId });
+        if (!lead) {
+          return { statusCode: 404, body: JSON.stringify({ error: 'Lead not found' }) };
+        }
         // Transform statusHistory to activity format
         const activityData = (lead?.statusHistory || []).map(item => ({
           createdAt: item.timestamp,
@@ -45,7 +54,7 @@ export const handler = async (event) => {
       // single user-lead with populated leadId
       if (id) {
         const leads = await collection.aggregate([
-          { $match: { _id: new ObjectId(id) } },
+          { $match: { _id: new ObjectId(id), userId } },
           {
             $lookup: {
               from: 'leads',
@@ -65,10 +74,9 @@ export const handler = async (event) => {
         return { statusCode: 200, body: JSON.stringify(lead) };
       }
 
-      // all leads with populated leadId
-      const query = userId ? { userId } : {};
+      // all leads for this user with populated leadId
       const leads = await collection.aggregate([
-        { $match: query },
+        { $match: { userId } },
         {
           $lookup: {
             from: 'leads',
@@ -91,14 +99,24 @@ export const handler = async (event) => {
     if (event.httpMethod === 'POST') {
       const data = JSON.parse(event.body);
 
-      // Create a proper userLead document with defaults
+      // Check if user already has this lead saved
+      const existing = await collection.findOne({
+        userId,
+        leadId: new ObjectId(data.leadId)
+      });
+
+      if (existing) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Lead already saved' }) };
+      }
+
+      // Create a proper userLead document
       const userLeadDoc = {
-        userId: data.userId || 'user123', // Default user for now
+        userId, // Use authenticated user's ID
         leadId: new ObjectId(data.leadId),
-        currentStatus: data.status || 'saved',
+        currentStatus: data.status || data.currentStatus || 'saved',
         statusHistory: [
           {
-            status: data.status || 'saved',
+            status: data.status || data.currentStatus || 'saved',
             timestamp: new Date().toISOString(),
             note: 'Lead saved to pipeline'
           }
@@ -118,7 +136,14 @@ export const handler = async (event) => {
 
     // PUT
     if (event.httpMethod === 'PUT') {
-      if (!id) return { statusCode: 400, body: 'Missing ID' };
+      if (!id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing ID' }) };
+
+      // Verify user owns this lead
+      const existing = await collection.findOne({ _id: new ObjectId(id), userId });
+      if (!existing) {
+        return { statusCode: 404, body: JSON.stringify({ error: 'Lead not found' }) };
+      }
+
       const data = JSON.parse(event.body);
 
       // status update
@@ -130,10 +155,14 @@ export const handler = async (event) => {
         };
 
         // Add timestamp for specific status changes
-        if (data.status === 'applied' && !data.appliedAt) {
+        if (data.status === 'applied' && !existing.appliedAt) {
           updateDoc.appliedAt = new Date().toISOString();
-        } else if (data.status === 'interviewing' && !data.interviewingAt) {
+        } else if (data.status === 'interviewing' && !existing.interviewingAt) {
           updateDoc.interviewingAt = new Date().toISOString();
+        } else if (data.status === 'offer' && !existing.offerAt) {
+          updateDoc.offerAt = new Date().toISOString();
+        } else if (data.status === 'offer_accepted' && !existing.offerAcceptedAt) {
+          updateDoc.offerAcceptedAt = new Date().toISOString();
         }
 
         // Add to status history
@@ -151,11 +180,16 @@ export const handler = async (event) => {
           }
         );
       } else {
+        // Regular update (priority, notes, etc.)
+        const updateData = { ...data };
+        delete updateData.userId; // Don't allow changing userId
+        delete updateData._id;
+
         await collection.updateOne(
           { _id: new ObjectId(id) },
           {
             $set: {
-              ...data,
+              ...updateData,
               updatedAt: new Date().toISOString()
             }
           }
@@ -168,13 +202,21 @@ export const handler = async (event) => {
 
     // DELETE
     if (event.httpMethod === 'DELETE') {
-      if (!id) return { statusCode: 400, body: 'Missing ID' };
+      if (!id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing ID' }) };
+
+      // Verify user owns this lead
+      const existing = await collection.findOne({ _id: new ObjectId(id), userId });
+      if (!existing) {
+        return { statusCode: 404, body: JSON.stringify({ error: 'Lead not found' }) };
+      }
+
       await collection.deleteOne({ _id: new ObjectId(id) });
       return { statusCode: 204, body: '' };
     }
 
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   } catch (err) {
+    console.error('user-leads error:', err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };

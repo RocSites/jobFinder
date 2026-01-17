@@ -1,8 +1,11 @@
 import './Header.css'
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 const Header = () => {
+    const { user, signOut, isAdmin } = useAuth();
+    const navigate = useNavigate();
     const [darkMode, setDarkMode] = useState(() => {
         const saved = localStorage.getItem('darkMode');
         return saved === 'true';
@@ -21,6 +24,18 @@ const Header = () => {
         setDarkMode(!darkMode);
     };
 
+    const handleLogout = async () => {
+        try {
+            await signOut();
+            navigate('/login');
+        } catch (err) {
+            console.error('Logout error:', err);
+        }
+    };
+
+    // Get display name from email (part before @)
+    const displayName = user?.email?.split('@')[0] || 'user';
+
     return (
         <>
             <div className="header">
@@ -30,8 +45,6 @@ const Header = () => {
                         <Link to="/pipeline">pipeline</Link>
                         <Link to="/leads">leads</Link>
                         <Link to="/referrals">referrals</Link>
-                        {/* <Link to="/">interviews</Link> */}
-                        {/* <Link to="/">messages</Link> */}
                     </nav>
                     <div className="spacer"></div>
                     <button
@@ -41,7 +54,12 @@ const Header = () => {
                     >
                         {darkMode ? '☀️' : '🌙'}
                     </button>
-                    <span className="user-info">doug_k | logout</span>
+                    <span className="user-info">
+                        {displayName}
+                        {isAdmin && <span className="admin-badge">admin</span>}
+                        {' | '}
+                        <button className="logout-btn" onClick={handleLogout}>logout</button>
+                    </span>
                 </div>
             </div>
         </>
