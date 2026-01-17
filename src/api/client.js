@@ -1,23 +1,24 @@
-import { supabase } from '../lib/supabase';
-
 const API_URL = import.meta.env.VITE_API_URL || '/.netlify/functions';
 
-// Get auth token for API calls
-const getAuthHeaders = async () => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
-      return { Authorization: `Bearer ${session.access_token}` };
-    }
-  } catch (err) {
-    console.warn('Could not get auth token:', err);
+// Store access token at module level - set by AuthContext
+let cachedAccessToken = null;
+
+// Function to update the cached token (called from AuthContext)
+export const setAccessToken = (token) => {
+  cachedAccessToken = token;
+};
+
+// Get auth headers using cached token
+const getAuthHeaders = () => {
+  if (cachedAccessToken) {
+    return { Authorization: `Bearer ${cachedAccessToken}` };
   }
   return {};
 };
 
 // Helper function for API calls with auth
 const fetchAPI = async (endpoint, options = {}) => {
-  const authHeaders = await getAuthHeaders();
+  const authHeaders = getAuthHeaders();
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     headers: {

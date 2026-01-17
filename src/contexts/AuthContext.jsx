@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { setAccessToken as setApiAccessToken } from '../api/client';
 
 const AuthContext = createContext({});
 
@@ -9,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentAccessToken, setCurrentAccessToken] = useState(null);
 
   // Fetch user profile (role, etc.)
   const fetchUserProfile = async (userId) => {
@@ -45,7 +47,10 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession()
       .then(async ({ data: { session } }) => {
         if (!isMounted) return;
+        const token = session?.access_token ?? null;
         setUser(session?.user ?? null);
+        setCurrentAccessToken(token);
+        setApiAccessToken(token); // Sync to API client
         if (session?.user) {
           const profile = await fetchUserProfile(session.user.id);
           if (isMounted) setUserProfile(profile);
@@ -60,7 +65,10 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        const token = session?.access_token ?? null;
         setUser(session?.user ?? null);
+        setCurrentAccessToken(token);
+        setApiAccessToken(token); // Sync to API client
         if (session?.user) {
           const profile = await fetchUserProfile(session.user.id);
           setUserProfile(profile);
@@ -147,10 +155,16 @@ export const AuthProvider = ({ children }) => {
 
   // Sign out
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      // Ignore AbortError from React StrictMode
+      if (err.name !== 'AbortError') throw err;
+    }
     setUser(null);
     setUserProfile(null);
+    setCurrentAccessToken(null);
+    setApiAccessToken(null); // Clear API client token
   };
 
   // Reset password request
@@ -169,10 +183,9 @@ export const AuthProvider = ({ children }) => {
     if (error) throw error;
   };
 
-  // Get current session token for API calls
-  const getAccessToken = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
+  // Get current session token for API calls - returns cached token directly
+  const getAccessToken = () => {
+    return currentAccessToken;
   };
 
   const value = {
@@ -186,6 +199,7 @@ export const AuthProvider = ({ children }) => {
     updatePassword,
     validateInviteCode,
     getAccessToken,
+    accessToken: currentAccessToken,
     isAdmin: userProfile?.role === 'admin',
     isAuthenticated: !!user,
   };

@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Create Supabase client for server-side validation
 const getSupabaseClient = () => {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
