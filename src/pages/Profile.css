@@ -1,0 +1,100 @@
+.profile-page {
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.profile-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #ff6600;
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.profile-name {
+    font-size: 24px;
+    margin: 0 0 8px;
+    color: #333333;
+}
+
+.profile-admin-badge {
+    display: inline-block;
+    background: #000000;
+    color: #ff6600;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-bottom: 24px;
+}
+
+.profile-info {
+    text-align: left;
+    border-top: 1px solid #eeeeee;
+    padding-top: 24px;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.profile-row:last-child {
+    border-bottom: none;
+}
+
+.profile-label {
+    color: #666666;
+    font-size: 14px;
+}
+
+.profile-value {
+    color: #333333;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Dark mode */
+body.dark-mode .profile-card {
+    background: #1a1a1a;
+    border-color: #333333;
+}
+
+body.dark-mode .profile-name {
+    color: #ffffff;
+}
+
+body.dark-mode .profile-info {
+    border-top-color: #333333;
+}
+
+body.dark-mode .profile-row {
+    border-bottom-color: #333333;
+}
+
+body.dark-mode .profile-label {
+    color: #999999;
+}
+
+body.dark-mode .profile-value {
+    color: #ffffff;
+}

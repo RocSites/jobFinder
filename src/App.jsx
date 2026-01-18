@@ -11,6 +11,7 @@ import ReferralDetail from "./pages/ReferralDetail";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ResetPassword from "./pages/ResetPassword";
+import Profile from "./pages/Profile";
 
 const App = () => (
   <AuthProvider>
@@ -24,6 +25,7 @@ const App = () => (
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="pipeline" element={<Pipeline />} />
           <Route path="leads">
             <Route index element={<Leads />} />
